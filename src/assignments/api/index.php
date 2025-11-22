@@ -54,7 +54,7 @@
 // ============================================================================
 
 // TODO: Include the database connection class
-
+require_once '../../../includes/db.php';
 
 // TODO: Create database connection
 
@@ -68,6 +68,7 @@
 // ============================================================================
 
 // TODO: Get the HTTP request method
+$method = $_SERVER['REQUEST_METHOD'];
 
 
 // TODO: Get the request body for POST and PUT requests

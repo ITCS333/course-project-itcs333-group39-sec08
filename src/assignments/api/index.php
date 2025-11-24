@@ -40,12 +40,19 @@
 // ============================================================================
 
 // TODO: Set Content-Type header to application/json
+header("Content-Type: application/json");
 
 
 // TODO: Set CORS headers to allow cross-origin requests
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
-
-// TODO: Handle preflight OPTIONS request
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 
 
@@ -57,10 +64,10 @@
 require_once '../../../includes/db.php';
 
 // TODO: Create database connection
-
+$db = $pdo;
 
 // TODO: Set PDO to throw exceptions on errors
-
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
 // ============================================================================
@@ -72,9 +79,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 
 // TODO: Get the request body for POST and PUT requests
-
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
 // TODO: Parse query parameters
+$query = $_GET;
 
 
 
@@ -96,31 +105,56 @@ $method = $_SERVER['REQUEST_METHOD'];
  */
 function getAllAssignments($db) {
     // TODO: Start building the SQL query
-    
-    
+    $sql = "SELECT id, title, description, due_date, files, created_at, updated_at FROM assignments";
+    $params = [];
+
+  
     // TODO: Check if 'search' query parameter exists in $_GET
-    
+    if (!empty($_GET['search'])) {
+        $sql .= " WHERE title LIKE :s OR description LIKE :s";
+        $params[':s'] = "%" . $_GET['search'] . "%";
+    }
     
     // TODO: Check if 'sort' and 'order' query parameters exist
+    $sort = "";
+    if (!empty($_GET['sort'])) {
+        $sort = $_GET['sort'];
+    }
     
+    $order = "asc";
+    if (!empty($_GET['order'])) {
+        $order = $_GET['order'];
+    }
+    
+    if ($sort !== "") {
+        $sql .= " ORDER BY " . $sort . " " . $order;
+    }
     
     // TODO: Prepare the SQL statement using $db->prepare()
-    
-    
+    $stmt = $db->prepare($sql);
+
     // TODO: Bind parameters if search is used
-    
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
     
     // TODO: Execute the prepared statement
-    
+    $stmt->execute();
     
     // TODO: Fetch all results as associative array
-    
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // TODO: For each assignment, decode the 'files' field from JSON to array
-    
-    
+    foreach ($rows as &$item) {
+        if (!empty($item['files'])) {
+            $item['files'] = json_decode($item['files'], true);
+        } else {
+            $item['files'] = [];
+        }
+    }
+
     // TODO: Return JSON response
-    
+    echo json_encode($rows);
 }
 
 
@@ -135,29 +169,44 @@ function getAllAssignments($db) {
  * Response: JSON object with assignment details
  */
 function getAssignmentById($db, $assignmentId) {
+   
+
     // TODO: Validate that $assignmentId is provided and not empty
-    
-    
+    if (empty($assignmentId)) {
+        echo json_encode(['error' => 'No assignment id provided']);
+        return;
+    }
     // TODO: Prepare SQL query to select assignment by id
-    
+   
+    $sql = "SELECT id, title, description, due_date, files, created_at, updated_at 
+    FROM assignments 
+    WHERE id = :id";
     
     // TODO: Bind the :id parameter
-    
-    
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':id', $assignmentId, PDO::PARAM_INT);
+
+
     // TODO: Execute the statement
-    
-    
+    $stmt->execute();
     // TODO: Fetch the result as associative array
-    
-    
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
     // TODO: Check if assignment was found
-    
+    if (!$row) {
+        echo json_encode(['error' => 'Assignment not found']);
+        return;
+    }
     
     // TODO: Decode the 'files' field from JSON to array
-    
+    if (!empty($row['files'])) {
+        $row['files'] = json_decode($row['files'], true);
+    } else {
+        $row['files'] = [];
+    }
     
     // TODO: Return success response with assignment data
-    
+    echo json_encode($row);
+
 }
 
 

@@ -61,7 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ============================================================================
 
 // TODO: Include the database connection class
-require_once '../../../includes/db.php';
+//include 'includes/db.php';
+include '../../../includes/db.php';
+
+//require_once '../../../includes/db.php';
 
 // TODO: Create database connection
 $db = $pdo;
@@ -127,7 +130,19 @@ function getAllAssignments($db) {
     }
     
     if ($sort !== "") {
-        $sql .= " ORDER BY " . $sort . " " . $order;
+        // Validate sort and order parameters
+        $allowedSortFields = ['title', 'due_date', 'created_at'];
+        $allowedOrderValues = ['asc', 'desc'];
+
+        if (!in_array($sort, $allowedSortFields)) {
+            $sort = 'created_at'; // Default sort field
+        }
+
+        if (!in_array(strtolower($order), $allowedOrderValues)) {
+            $order = 'asc'; // Default order
+        }
+
+        $sql .= " ORDER BY " . $sort . " " . strtoupper($order);
     }
     
     // TODO: Prepare the SQL statement using $db->prepare()
@@ -224,35 +239,62 @@ function getAssignmentById($db, $assignmentId) {
  * Response: JSON object with created assignment data
  */
 function createAssignment($db, $data) {
-    // TODO: Validate required fields
-    
-    
+     // TODO: Validate required fields
+     if (empty($data['title']) || empty($data['description']) || empty($data['due_date'])) {
+        echo json_encode(['error' => 'Missing required fields']);
+        return;
+    }
+
     // TODO: Sanitize input data
-    
-    
+    $title       = trim($data['title']);
+    $description = trim($data['description']);
+    $due_date    = trim($data['due_date']);
+
     // TODO: Validate due_date format
-    
-    
+    if (!validateDate($due_date)) {
+        echo json_encode(['error' => 'Invalid date format']);
+        return;
+    }
+
     // TODO: Generate a unique assignment ID
-    
-    
+    // (Handled by AUTO_INCREMENT in DB)
+
     // TODO: Handle the 'files' field
-    
-    
+    $files = [];
+    if (!empty($data['files']) && is_array($data['files'])) {
+        $files = $data['files'];
+    }
+    $filesJson = json_encode($files);
+
     // TODO: Prepare INSERT query
-    
-    
+    $sql = "INSERT INTO assignments (title, description, due_date, files, created_at, updated_at)
+            VALUES (:title, :description, :due_date, :files, NOW(), NOW())";
+
     // TODO: Bind all parameters
-    
-    
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':title', $title);
+    $stmt->bindValue(':description', $description);
+    $stmt->bindValue(':due_date', $due_date);
+    $stmt->bindValue(':files', $filesJson);
+
     // TODO: Execute the statement
-    
-    
+    $ok = $stmt->execute();
+
     // TODO: Check if insert was successful
-    
-    
+    if ($ok) {
+        $newId = $db->lastInsertId();
+        echo json_encode([
+            'id'          => $newId,
+            'title'       => $title,
+            'description' => $description,
+            'due_date'    => $due_date,
+            'files'       => $files
+        ]);
+        return;
+    }
+
     // TODO: If insert failed, return 500 error
-    
+    echo json_encode(['error' => 'Failed to create assignment']);
 }
 
 
@@ -271,40 +313,97 @@ function createAssignment($db, $data) {
  * Response: JSON object with success status
  */
 function updateAssignment($db, $data) {
-    // TODO: Validate that 'id' is provided in $data
-    
-    
+     // TODO: Validate that 'id' is provided in $data
+     if (empty($data['id'])) {
+        echo json_encode(['error' => 'Missing assignment id']);
+        return;
+    }
+
     // TODO: Store assignment ID in variable
-    
-    
+    $assignmentId = $data['id'];
+
     // TODO: Check if assignment exists
-    
-    
+    $checkQuery = "SELECT id FROM assignments WHERE id = :id";
+    $checkStatement = $db->prepare($checkQuery);
+    $checkStatement->bindValue(':id', $assignmentId);
+    $checkStatement->execute();
+    $existingAssignment = $checkStatement->fetch(PDO::FETCH_ASSOC);
+
+    if (!$existingAssignment) {
+        echo json_encode(['error' => 'Assignment not found']);
+        return;
+    }
+
     // TODO: Build UPDATE query dynamically based on provided fields
-    
-    
+    $updateQuery = "UPDATE assignments SET ";
+    $updateFields = [];
+    $updateParameters = [];
+
     // TODO: Check which fields are provided and add to SET clause
-    
-    
-    // TODO: If no fields to update (besides updated_at), return 400 error
-    
-    
+    if (isset($data['title'])) {
+        $updateFields[] = "title = :title";
+        $updateParameters[':title'] = trim($data['title']);
+    }
+
+    if (isset($data['description'])) {
+        $updateFields[] = "description = :description";
+        $updateParameters[':description'] = trim($data['description']);
+    }
+
+    if (isset($data['due_date']) && $data['due_date'] !== "") {
+        $cleanDueDate = trim($data['due_date']);
+
+        // Validate format
+        if (!validateDate($cleanDueDate)) {
+            echo json_encode(['error' => 'Invalid date format']);
+            return;
+        }
+
+        $updateFields[] = "due_date = :due_date";
+        $updateParameters[':due_date'] = $cleanDueDate;
+    }
+
+    if (isset($data['files'])) {
+        $encodedFiles = json_encode($data['files']);
+        $updateFields[] = "files = :files";
+        $updateParameters[':files'] = $encodedFiles;
+    }
+
+    // TODO: If no fields to update, return 400 error
+    if (count($updateFields) === 0) {
+        echo json_encode(['error' => 'No fields to update']);
+        return;
+    }
+
     // TODO: Complete the UPDATE query
-    
-    
+    $updateFields[] = "updated_at = NOW()";
+    $updateQuery .= implode(", ", $updateFields) . " WHERE id = :id";
+
     // TODO: Prepare the statement
-    
-    
+    $updateStatement = $db->prepare($updateQuery);
+
     // TODO: Bind all parameters dynamically
-    
-    
+    foreach ($updateParameters as $key => $value) {
+        $updateStatement->bindValue($key, $value);
+    }
+    $updateStatement->bindValue(':id', $assignmentId);
+
     // TODO: Execute the statement
-    
-    
+    $executionResult = $updateStatement->execute();
+
     // TODO: Check if update was successful
-    
-    
+    if (!$executionResult) {
+        echo json_encode(['error' => 'Failed to update assignment']);
+        return;
+    }
+
     // TODO: If no rows affected, return appropriate message
+    if ($updateStatement->rowCount() === 0) {
+        echo json_encode(['message' => 'No changes were made']);
+        return;
+    }
+
+    echo json_encode(['success' => true]);
     
 }
 
@@ -321,28 +420,52 @@ function updateAssignment($db, $data) {
  */
 function deleteAssignment($db, $assignmentId) {
     // TODO: Validate that $assignmentId is provided and not empty
-    
-    
+    if (empty($assignmentId)) {
+        echo json_encode(['error' => 'No assignment id provided']);
+        return;
+    }
+
     // TODO: Check if assignment exists
-    
-    
+    $checkSql = "SELECT id FROM assignments WHERE id = :id";
+    $checkStmt = $db->prepare($checkSql);
+    $checkStmt->bindValue(':id', $assignmentId);
+    $checkStmt->execute();
+    $found = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$found) {
+        echo json_encode(['error' => 'Assignment not found']);
+        return;
+    }
+
     // TODO: Delete associated comments first (due to foreign key constraint)
-    
-    
+    $delComSql = "DELETE FROM comments WHERE assignment_id = :id";
+    $delComStmt = $db->prepare($delComSql);
+    $delComStmt->bindValue(':id', $assignmentId);
+    $delComStmt->execute();
+
     // TODO: Prepare DELETE query for assignment
-    
-    
+    $delSql = "DELETE FROM assignments WHERE id = :id";
+
     // TODO: Bind the :id parameter
-    
-    
+    $delStmt = $db->prepare($delSql);
+    $delStmt->bindValue(':id', $assignmentId);
+
     // TODO: Execute the statement
-    
-    
+    $done = $delStmt->execute();
+
     // TODO: Check if delete was successful
-    
-    
-    // TODO: If delete failed, return 500 error
-    
+    if (!$done) {
+        // TODO: If delete failed, return 500 error
+        echo json_encode(['error' => 'Failed to delete assignment']);
+        return;
+    }
+
+    if ($delStmt->rowCount() === 0) {
+        echo json_encode(['error' => 'No assignment deleted']);
+        return;
+    }
+
+    echo json_encode(['success' => true]);
 }
 
 
@@ -361,22 +484,30 @@ function deleteAssignment($db, $assignmentId) {
  * Response: JSON array of comment objects
  */
 function getCommentsByAssignment($db, $assignmentId) {
-    // TODO: Validate that $assignmentId is provided and not empty
-    
-    
+     // TODO: Validate that $assignmentId is provided and not empty
+     if (empty($assignmentId)) {
+        echo json_encode(['error' => 'Missing assignment id']);
+        return;
+    }
+
     // TODO: Prepare SQL query to select all comments for the assignment
-    
-    
+    $sql = "SELECT id, assignment_id, author, text, created_at 
+            FROM comments 
+            WHERE assignment_id = :assignment_id
+            ORDER BY created_at DESC";
+
     // TODO: Bind the :assignment_id parameter
-    
-    
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':assignment_id', $assignmentId);
+
     // TODO: Execute the statement
-    
-    
+    $stmt->execute();
+
     // TODO: Fetch all results as associative array
-    
-    
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     // TODO: Return success response with comments data
+    echo json_encode($comments);
     
 }
 
@@ -395,30 +526,62 @@ function getCommentsByAssignment($db, $assignmentId) {
  */
 function createComment($db, $data) {
     // TODO: Validate required fields
-    
-    
+    if (empty($data['assignment_id']) || empty($data['author']) || empty($data['text'])) {
+        echo json_encode(['error' => 'Missing required fields']);
+        return;
+    }
+
     // TODO: Sanitize input data
-    
-    
+    $assignmentId = trim($data['assignment_id']);
+    $author = trim($data['author']);
+    $text = trim($data['text']);
+
     // TODO: Validate that text is not empty after trimming
-    
-    
+    if ($text === "") {
+        echo json_encode(['error' => 'Comment text cannot be empty']);
+        return;
+    }
+
     // TODO: Verify that the assignment exists
-    
-    
+    $checkSql = "SELECT id FROM assignments WHERE id = :id";
+    $checkStmt = $db->prepare($checkSql);
+    $checkStmt->bindValue(':id', $assignmentId);
+    $checkStmt->execute();
+    $found = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$found) {
+        echo json_encode(['error' => 'Assignment not found']);
+        return;
+    }
+
     // TODO: Prepare INSERT query for comment
-    
-    
+    $sql = "INSERT INTO comments (assignment_id, author, text, created_at)
+            VALUES (:assignment_id, :author, :text, NOW())";
+
     // TODO: Bind all parameters
-    
-    
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':assignment_id', $assignmentId);
+    $stmt->bindValue(':author', $author);
+    $stmt->bindValue(':text', $text);
+
     // TODO: Execute the statement
-    
-    
+    $ok = $stmt->execute();
+
+    if (!$ok) {
+        echo json_encode(['error' => 'Failed to create comment']);
+        return;
+    }
+
     // TODO: Get the ID of the inserted comment
-    
-    
+    $commentId = $db->lastInsertId();
+
     // TODO: Return success response with created comment data
+    echo json_encode([
+        'id' => $commentId,
+        'assignment_id' => $assignmentId,
+        'author' => $author,
+        'text' => $text
+    ]);
     
 }
 
@@ -435,24 +598,41 @@ function createComment($db, $data) {
  */
 function deleteComment($db, $commentId) {
     // TODO: Validate that $commentId is provided and not empty
-    
-    
+    if (empty($commentId)) {
+        echo json_encode(['error' => 'Missing comment id']);
+        return;
+    }
+
     // TODO: Check if comment exists
-    
-    
+    $checkSql = "SELECT id FROM comments WHERE id = :id";
+    $checkStmt = $db->prepare($checkSql);
+    $checkStmt->bindValue(':id', $commentId);
+    $checkStmt->execute();
+    $found = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$found) {
+        echo json_encode(['error' => 'Comment not found']);
+        return;
+    }
+
     // TODO: Prepare DELETE query
-    
-    
+    $sql = "DELETE FROM comments WHERE id = :id";
+
     // TODO: Bind the :id parameter
-    
-    
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':id', $commentId);
+
     // TODO: Execute the statement
-    
-    
+    $ex = $stmt->execute();
+
     // TODO: Check if delete was successful
-    
-    
-    // TODO: If delete failed, return 500 error
+    if (!$ex) {
+        // TODO: If delete failed, return 500 error
+        echo json_encode(['error' => 'Failed to delete comment']);
+        return;
+    }
+
+    echo json_encode(['success' => true]);
     
 }
 
@@ -462,76 +642,91 @@ function deleteComment($db, $commentId) {
 // ============================================================================
 
 try {
-    // TODO: Get the 'resource' query parameter to determine which resource to access
-    
-    
-    // TODO: Route based on HTTP method and resource type
-    
-    if ($method === 'GET') {
-        // TODO: Handle GET requests
-        
-        if ($resource === 'assignments') {
-            // TODO: Check if 'id' query parameter exists
-            
-        } elseif ($resource === 'comments') {
-            // TODO: Check if 'assignment_id' query parameter exists
-            
-        } else {
-            // TODO: Invalid resource, return 400 error
-            
-        }
-        
-    } elseif ($method === 'POST') {
-        // TODO: Handle POST requests (create operations)
-        
-        if ($resource === 'assignments') {
-            // TODO: Call createAssignment($db, $data)
-            
-        } elseif ($resource === 'comments') {
-            // TODO: Call createComment($db, $data)
-            
-        } else {
-            // TODO: Invalid resource, return 400 error
-            
-        }
-        
-    } elseif ($method === 'PUT') {
-        // TODO: Handle PUT requests (update operations)
-        
-        if ($resource === 'assignments') {
-            // TODO: Call updateAssignment($db, $data)
-            
-        } else {
-            // TODO: PUT not supported for other resources
-            
-        }
-        
-    } elseif ($method === 'DELETE') {
-        // TODO: Handle DELETE requests
-        
-        if ($resource === 'assignments') {
-            // TODO: Get 'id' from query parameter or request body
-            
-        } elseif ($resource === 'comments') {
-            // TODO: Get comment 'id' from query parameter
-            
-        } else {
-            // TODO: Invalid resource, return 400 error
-            
-        }
-        
-    } else {
-        // TODO: Method not supported
-        
-    }
-    
-} catch (PDOException $e) {
-    // TODO: Handle database errors
-    
-} catch (Exception $e) {
-    // TODO: Handle general errors
-    
-}
+     // Get the 'resource' query parameter to determine which resource to access
+     $resource = isset($query['resource']) ? $query['resource'] : null;
+
+     // Route based on HTTP method and resource type
+     if ($method === 'GET') {
+         // Handle GET requests
+         if ($resource === 'assignments') {
+             // Check if 'id' query parameter exists
+             if (isset($query['id'])) {
+                 getAssignmentById($db, $query['id']);
+             } else {
+                 getAllAssignments($db);
+             }
+ 
+         } elseif ($resource === 'comments') {
+             // Check if 'assignment_id' query parameter exists
+             if (isset($query['assignment_id'])) {
+                 getCommentsByAssignment($db, $query['assignment_id']);
+             } else {
+                 sendResponse(['error' => 'Missing assignment_id'], 400);
+             }
+ 
+         } else {
+             // Invalid resource, return 400 error
+             sendResponse(['error' => 'Invalid resource'], 400);
+         }
+ 
+     } elseif ($method === 'POST') {
+         // Handle POST requests (create operations)
+         if ($resource === 'assignments') {
+             createAssignment($db, $data);
+ 
+         } elseif ($resource === 'comments') {
+             createComment($db, $data);
+ 
+         } else {
+             // Invalid resource, return 400 error
+             sendResponse(['error' => 'Invalid resource'], 400);
+         }
+ 
+     } elseif ($method === 'PUT') {
+         // Handle PUT requests (update operations)
+         if ($resource === 'assignments') {
+             updateAssignment($db, $data);
+         } else {
+             // PUT not supported for other resources
+             sendResponse(['error' => 'PUT not supported for this resource'], 400);
+         }
+ 
+     } elseif ($method === 'DELETE') {
+         // Handle DELETE requests
+         if ($resource === 'assignments') {
+             // Get 'id' from query parameter
+             if (isset($query['id'])) {
+                 deleteAssignment($db, $query['id']);
+             } else {
+                 sendResponse(['error' => 'Missing assignment id'], 400);
+             }
+ 
+         } elseif ($resource === 'comments') {
+             // Get comment 'id' from query parameter
+             if (isset($query['id'])) {
+                 deleteComment($db, $query['id']);
+             } else {
+                 sendResponse(['error' => 'Missing comment id'], 400);
+             }
+ 
+         } else {
+             // Invalid resource, return 400 error
+             sendResponse(['error' => 'Invalid resource'], 400);
+         }
+ 
+     } else {
+         // Method not supported
+         sendResponse(['error' => 'Method not supported'], 405);
+     }
+ 
+ } catch (PDOException $e) {
+     // Handle database errors
+     sendResponse(['error' => 'Database error: ' . $e->getMessage()], 500);
+ 
+ } catch (Exception $e) {
+     // Handle general errors
+     sendResponse(['error' => 'Server error: ' . $e->getMessage()], 500);
+ }
 
 
 // ============================================================================
@@ -545,16 +740,20 @@ try {
  * @param int $statusCode - HTTP status code (default: 200)
  */
 function sendResponse($data, $statusCode = 200) {
+
     // TODO: Set HTTP response code
-    
-    
+    http_response_code($statusCode);
+
     // TODO: Ensure data is an array
-    
-    
+    if (!is_array($data)) {
+        $data = ['message' => $data];
+    }
+
     // TODO: Echo JSON encoded data
-    
-    
+    echo json_encode($data);
+
     // TODO: Exit to prevent further execution
+    exit;
     
 }
 
@@ -566,16 +765,17 @@ function sendResponse($data, $statusCode = 200) {
  * @return string - Sanitized data
  */
 function sanitizeInput($data) {
-    // TODO: Trim whitespace from beginning and end
-    
-    
+       // TODO: Trim whitespace from beginning and end
+    $data = trim($data);
+
     // TODO: Remove HTML and PHP tags
-    
-    
+    $data = strip_tags($data);
+
     // TODO: Convert special characters to HTML entities
-    
-    
+    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+
     // TODO: Return the sanitized data
+    return $data;
     
 }
 
@@ -588,10 +788,10 @@ function sanitizeInput($data) {
  */
 function validateDate($date) {
     // TODO: Use DateTime::createFromFormat to validate
-    
-    
+    $d = DateTime::createFromFormat('Y-m-d', $date);
+
     // TODO: Return true if valid, false otherwise
-    
+    return $d && $d->format('Y-m-d') === $date;
 }
 
 
@@ -603,10 +803,7 @@ function validateDate($date) {
  * @return bool - True if valid, false otherwise
  */
 function validateAllowedValue($value, $allowedValues) {
-    // TODO: Check if $value exists in $allowedValues array
-    
-    
-    // TODO: Return the result
+    return in_array($value, $allowedValues);
     
 }
 

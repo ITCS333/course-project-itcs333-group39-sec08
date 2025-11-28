@@ -1,31 +1,16 @@
-/*
-  Requirement: Populate the assignment detail page and discussion forum.
 
-  Instructions:
-  1. Link this file to `details.html` using:
-     <script src="details.js" defer></script>
-
-  2. In `details.html`, add the following IDs:
-     - To the <h1>: `id="assignment-title"`
-     - To the "Due" <p>: `id="assignment-due-date"`
-     - To the "Description" <p>: `id="assignment-description"`
-     - To the "Attached Files" <ul>: `id="assignment-files-list"`
-     - To the <div> for comments: `id="comment-list"`
-     - To the "Add a Comment" <form>: `id="comment-form"`
-     - To the <textarea>: `id="new-comment-text"`
-
-  3. Implement the TODOs below.
-*/
-
-// --- Global Data Store ---
-// These will hold the data related to *this* assignment.
 let currentAssignmentId = null;
 let currentComments = [];
 
-// --- Element Selections ---
-// TODO: Select all the elements you added IDs for in step 2.
+const assignmentTitle = document.querySelector("#assignment-title");
+const assignmentDueDate = document.querySelector("#assignment-due-date");
+const assignmentDescription = document.querySelector("#assignment-description");
+const assignmentFilesList = document.querySelector("#assignment-files-list");
+const commentList = document.querySelector("#comment-list");
+const commentForm = document.querySelector("#comment-form");
+const newCommentText = document.querySelector("#new-comment-text");
 
-// --- Functions ---
+
 
 /**
  * TODO: Implement the getAssignmentIdFromURL function.
@@ -35,7 +20,9 @@ let currentComments = [];
  * 3. Return the id.
  */
 function getAssignmentIdFromURL() {
-  // ... your implementation here ...
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  return urlParams.get('id');
 }
 
 /**
@@ -49,7 +36,20 @@ function getAssignmentIdFromURL() {
  * `<li><a href="#">...</a></li>` for each file in the assignment's 'files' array.
  */
 function renderAssignmentDetails(assignment) {
-  // ... your implementation here ...
+  assignmentTitle.textContent = assignment.title;
+  assignmentDueDate.textContent = "Due: " + assignment.dueDate;
+  assignmentDescription.textContent = assignment.description;
+  assignmentFilesList.innerHTML = "";
+
+  assignment.files.forEach((file) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = file;
+    li.appendChild(a);
+    assignmentFilesList.appendChild(li);
+  });
+
 }
 
 /**
@@ -58,7 +58,18 @@ function renderAssignmentDetails(assignment) {
  * It should return an <article> element matching the structure in `details.html`.
  */
 function createCommentArticle(comment) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+
+  const textP = document.createElement("p");
+  textP.textContent = comment.text;
+
+  footer.textContent = "Posted by: " + comment.author;
+
+  article.appendChild(textP);
+  article.appendChild(footer);
+
+  return article;
+
 }
 
 /**
@@ -70,7 +81,11 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
-  // ... your implementation here ...
+  commentList.innerHTML = "";
+  currentComments.forEach((comment) => {
+    const article = createCommentArticle(comment);
+    commentList.appendChild(article);
+  });
 }
 
 /**
@@ -87,7 +102,20 @@ function renderComments() {
  * 7. Clear the `newCommentText` textarea.
  */
 function handleAddComment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+  const commentText = newCommentText.value.trim();
+  if (commentText === "") {
+    return;
+  }
+  const newComment = {
+    author: "Student",
+    text: commentText
+  };
+  currentComments.push(newComment);
+  renderComments();
+  newCommentText.value = "";
+
+
 }
 
 /**
@@ -107,8 +135,31 @@ function handleAddComment(event) {
  * 7. If the assignment is not found, display an error.
  */
 async function initializePage() {
-  // ... your implementation here ...
+  currentAssignmentId = getAssignmentIdFromURL();
+  if (!currentAssignmentId) {
+    console.error("No assignment ID found in URL.");
+    return;
+  }
+  const [assignmentsResponse, commentsResponse] = await Promise.all([
+    fetch("assignments.json"),
+    fetch("comments.json")
+  ]);
+
+  const assignmentsData = await assignmentsResponse.json();
+  const commentsData = await commentsResponse.json();
+
+  const assignment = assignmentsData.find(a => a.id === currentAssignmentId);
+  currentComments = commentsData[currentAssignmentId] || [];
+
+  if (!assignment) {
+    assignmentTitle.textContent = "Assignment not found.";
+    return;
+  }
+
+  renderAssignmentDetails(assignment);
+  renderComments();
+  commentForm.addEventListener("submit", handleAddComment);
+
 }
 
-// --- Initial Page Load ---
 initializePage();

@@ -9,24 +9,26 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <script src="details.js" defer></script>
     <title>Assignment Details</title>
     <!-- TODO: Link to your CSS framework or stylesheet. -->
 </head>
 <body>
-     <h1>Assignment 1: HTML Basics</h1>
+     <h1 id="assignment-title">Assignment 1: HTML Basics</h1>
 
    
     <main>
          <article>
-            <p>Due: 2024-07-15</p>
+            <p id="assignment-due-date">Due: 2024-07-15</p>
             <h2>Description</h2>
 
-            <p>This assignment covers the basics of HTML structure, including elements, attributes, and semantic tags. Students are expected to create a simple webpage using the learned concepts.</p>
+            <p id="assignment-description">This assignment covers the basics of HTML structure, including elements, 
+                attributes, and semantic tags. Students are expected to create a simple webpage using the learned concepts.</p>
 
             <h2>Attached Files & Links</h2>
              
     
-            <ul>
+            <ul id="assignment-files-list">
                 <!-- TODO: Add list items ('li') with anchor tags ('a') for each resource. Use dummy links for now. -->
                 <li><a href="#">assignment-brief.pdf</a></li>
                 <li><a href="#">example-webpage.html</a></li>
@@ -40,7 +42,7 @@
         <section id="discussion-forum">
             <h2>Questions & Discussion</h2>
         
-                 <div>
+                 <div id="comment-list">
                     <article>
                         <p>Is it okay to use a 'section' inside an 'article'?</p>
                         <footer>Posted by: Sara Omar </footer>
@@ -56,7 +58,7 @@
                     <legend>Ask a Question</legend>
 
                     <label for="new-comment">Your Question:</label>
-                    <textarea id="new-comment" required></textarea>
+                    <textarea id="new-comment-text" required></textarea>
                     
                     <button type="submit">Post Comment</button>
             

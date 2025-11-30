@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact WebHack Team for web development inquiries.">
+  <title>Contact WebHack Team</title>
+</head>
+
+<body>
+  <header>
+    <h1 style="color: #FF0000;">WebHack Team</h1>
+    <p style="color: rgb(0, 128, 0);">Building Awesome Websites</p>
+  </header>
+
+  <h2 style="color: blue;">Contact Us</h2>
+  <p>Got a question or project idea? Fill out the form below to reach us!</p>
+
+  <form method="post" action="submit.php" enctype="multipart/form-data">
+    <fieldset>
+      <legend>Your Details</legend>
+      <p>
+        <label for="name">Full Name:</label><br>
+        <input type="text" id="name" name="name" required>
+      </p>
+      <p>
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email" required>
+      </p>
+      <p>
+        <label for="phone">Phone Number:</label><br>
+        <input type="tel" id="phone" name="phone">
+      </p>
+      <p>
+        <label for="password">Password (for account creation):</label><br>
+        <input type="password" id="password" name="password">
+      </p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Project Preferences</legend>
+      <p>
+        <label>Project Type:</label><br>
+        <input type="radio" id="website" name="project_type" value="website">
+        <label for="website">Website</label>
+        <input type="radio" id="app" name="project_type" value="app">
+        <label for="app">Web App</label>
+      </p>
+      <p>
+        <label>Services Needed:</label><br>
+        <input type="checkbox" id="design" name="services" value="design">
+        <label for="design">Design</label>
+        <input type="checkbox" id="development" name="services" value="development">
+        <label for="development">Development</label>
+        <input type="checkbox" id="seo" name="services" value="seo">
+        <label for="seo">SEO</label>
+      </p>
+      <p>
+        <label for="color">Brand Color:</label><br>
+        <input type="color" id="color" name="color">
+      </p>
+      <p>
+        <label for="budget">Budget Range:</label><br>
+        <input type="range" id="budget" name="budget" min="1000" max="10000">
+      </p>
+      <p>
+        <label for="quantity">Number of Pages:</label><br>
+        <input type="number" id="quantity" name="quantity" min="1" max="50">
+      </p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Project Timeline</legend>
+      <p>
+        <label for="start_date">Start Date:</label><br>
+        <input type="date" id="start_date" name="start_date">
+      </p>
+      <p>
+        <label for="start_time">Preferred Meeting Time:</label><br>
+        <input type="time" id="start_time" name="start_time">
+      </p>
+      <p>
+        <label for="deadline">Project Deadline:</label><br>
+        <input type="datetime-local" id="deadline" name="deadline">
+      </p>
+      <p>
+        <label for="month">Planning Month:</label><br>
+        <input type="month" id="month" name="month">
+      </p>
+      <p>
+        <label for="week">Planning Week:</label><br>
+        <input type="week" id="week" name="week">
+      </p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Additional Info</legend>
+      <p>
+        <label for="category">Project Category:</label><br>
+        <select id="category" name="category">
+          <option value="ecommerce">E-commerce</option>
+          <option value="portfolio">Portfolio</option>
+          <option value="blog">Blog</option>
+          <option value="corporate">Corporate</option>
+        </select>
+      </p>
+      <p>
+        <label for="message">Your Message:</label><br>
+        <textarea id="message" name="message" rows="5" cols="40"></textarea>
+      </p>
+      <p>
+        <label for="file">Upload Project Files:</label><br>
+        <input type="file" id="file" name="file">
+      </p>
+    </fieldset>
+
+    <p>
+      <button type="submit">Send Message</button>
+      <button type="reset">Clear Form</button>
+    </p>
+  </form>
+
+  <a href="#">Home</a> |
+  <a href="https://www.google.com/search?q=WebHack Team"> About us from Google</a> | 
+  <a href="about.html" target="_blank">About</a> |
+  <a href="contact_us.html">Contact us</a>
+
+  <footer>
+    <p>&copy; 2025 WebHack Team. All rights reserved.</p>
+  </footer>
+</body>
+
+</html>

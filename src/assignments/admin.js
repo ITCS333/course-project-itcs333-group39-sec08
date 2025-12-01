@@ -143,12 +143,20 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
-  const response = await fetch("assignments.json");
-  assignments = await response.json();
+  try {
+    const response = await fetch("assignments.json");
+
+    
+    assignments = await response.json();
+  } catch (error) {
+    console.error("Error loading assignments.json:", error);
+ 
+    assignments = [];
+  }
+
   renderTable();
   assignmentForm.addEventListener("submit", handleAddAssignment);
   assignmentsTableBody.addEventListener("click", handleTableClick);
 }
-
 
 loadAndInitialize();

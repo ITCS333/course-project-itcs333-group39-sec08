@@ -5,6 +5,8 @@
   <title>Manage Assignments</title>
 
     <!-- TODO: Link to your CSS framework or stylesheet. -->
+    <link rel="stylesheet" href="../common/styles.css">
+
     <script src="admin.js" defer></script>
 </head>
 <body>
@@ -12,7 +14,7 @@
 
      <main>
 
-         <section>
+         <section class="assignment-form-section">
         
             <h2>Add a New Assignment</h2>
         
@@ -34,12 +36,12 @@
                          <label for="assignment-files">Attached Files/Links:</label>
                          <textarea id="assignment-files" rows="3"></textarea>
 
-               <button id="add-assignment" type="submit">Add Assignment</button>
+               <button id="add-assignment" type="submit" class="assignment-btn">Add Assignment</button>
                 </fieldset>
                 </form>
          </section>
 
-             <section>
+             <section class="assignment-table-section">
                 <h2>Current Assignments</h2>
 
         

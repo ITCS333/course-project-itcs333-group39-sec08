@@ -24,7 +24,7 @@
  *   - assignment_id (VARCHAR(50), FOREIGN KEY)
  *   - author (VARCHAR(100))
  *   - text (TEXT)
- *   - created_at (TIMESTAMP)
+ *   - created_at (TIMESTAMP) 
  * 
  * HTTP Methods Supported:
  *   - GET: Retrieve assignment(s) or comment(s)
@@ -61,10 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ============================================================================
 
 // TODO: Include the database connection class
-//include 'includes/db.php';
-include '../../../includes/db.php';
-
-//require_once '../../../includes/db.php';
+include '../../db.php';
 
 // TODO: Create database connection
 $db = $pdo;

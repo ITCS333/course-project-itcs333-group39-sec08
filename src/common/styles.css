@@ -1,1 +1,87 @@
-/* CSS Styles */
+
+
+   .assignment-page {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+.assignment-page h1 {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
+.assignment-page h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+
+.assignment-form-section fieldset {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.assignment-form-section label {
+    display: block;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+.assignment-form-section input,
+.assignment-form-section textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+.assignment-btn {
+    margin-top: 15px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ddd;  
+    cursor: pointer;
+}
+
+.assignment-btn:hover {
+    background-color: #ccc;
+}
+
+
+#assignments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#assignments-table th,
+#assignments-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+#assignments-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.edit-assignment, .delete-assignment {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ddd; 
+    cursor: pointer;
+}
+
+.edit-assignment:hover,
+ .delete-assignment:hover {  
+    background-color: #ccc;
+}

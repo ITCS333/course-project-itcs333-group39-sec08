@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script>
+            function Add(){
+            let num1=parseFloat(document.getElementById('num1').value);
+            let num2=parseFloat(document.getElementById('num2').value);
+            let res=num1+num2;
+            //alert("Result= "+res)
+            document.getElementById('res').textContent = "Result= "+res;
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Calculator</h1>
+        Number 1:<input type ="text" id="num1"><br>
+        Number 2:<input type ="text" id="num2"><br>
+        <button onclick="Add()">Add (+)</button>
+        <button onclick="alert('enter two numbers')">Help</button>
+        <h3 id="res">Result= </h3>
+    </body>

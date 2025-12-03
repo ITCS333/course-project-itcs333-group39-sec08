@@ -23,6 +23,14 @@ let currentComments = [];
 
 // --- Element Selections ---
 // TODO: Select all the elements you added IDs for in step 2.
+let resourceTitle = document.querySelector('#resource-title');
+let resourceDescription = document.querySelector('#resource-description');
+let resourceLink = document.querySelector('#resource-link');
+let commentList = document.querySelector('#comment-list');
+let commentForm = document.querySelector('#comment-form');
+let newComment = document.querySelector('#new-comment');
+
+
 
 // --- Functions ---
 
@@ -34,8 +42,17 @@ let currentComments = [];
  * 3. Return the id.
  */
 function getResourceIdFromURL() {
-  // ... your implementation here ...
-}
+ // 1. Get the query string
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let id = urlParams.get('id');
+    
+    // إذا كان ID رقم، حوله إلى "res_X"
+    if (id && /^\d+$/.test(id)) {
+        id = `res_${id}`;
+    }
+    // 3. Return the id
+    return id;}
 
 /**
  * TODO: Implement the renderResourceDetails function.
@@ -46,8 +63,20 @@ function getResourceIdFromURL() {
  * 3. Set the `href` attribute of `resourceLink` to the resource's link.
  */
 function renderResourceDetails(resource) {
-  // ... your implementation here ...
-}
+ // 1. Set the textContent of resourceTitle to the resource's title
+    if (resourceTitle && resource.title) {
+        resourceTitle.textContent = resource.title;
+    }
+    
+    // 2. Set the textContent of resourceDescription to the resource's description
+    if (resourceDescription && resource.description) {
+        resourceDescription.textContent = resource.description;
+    }
+    
+    // 3. Set the href attribute of resourceLink to the resource's link
+    if (resourceLink && resource.link) {
+        resourceLink.href = resource.link;}
+    }
 
 /**
  * TODO: Implement the createCommentArticle function.
@@ -56,8 +85,25 @@ function renderResourceDetails(resource) {
  * (e.g., an <article> containing a <p> and a <footer>).
  */
 function createCommentArticle(comment) {
-  // ... your implementation here ...
+     // Create article element
+    const article = document.createElement('article');
+    article.className = 'comment'; // Add class for styling
+    
+    // Create paragraph (p) for the comment text
+    const textParagraph = document.createElement('p');
+    textParagraph.textContent = comment.text;
+    
+    // Create footer for the author
+    const footer = document.createElement('footer');
+    footer.textContent = `Posted by: ${comment.author}`;
+    
+    // Append elements to article
+    article.appendChild(textParagraph);
+    article.appendChild(footer);
+    
+    return article;
 }
+
 
 /**
  * TODO: Implement the renderComments function.
@@ -68,8 +114,22 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
-  // ... your implementation here ...
-}
+    // 1. Clear the commentList
+    if (commentList) {
+        commentList.innerHTML = '';
+    } else {
+        console.error('commentList element not found');
+        return;
+    }
+    
+    // 2. Loop through the global currentComments array
+    currentComments.forEach(comment => {
+        // 3. For each comment, call createCommentArticle()
+        const commentArticle = createCommentArticle(comment);
+        
+        // Append the resulting <article> to commentList
+        commentList.appendChild(commentArticle);
+    });}
 
 /**
  * TODO: Implement the handleAddComment function.
@@ -85,8 +145,33 @@ function renderComments() {
  * 7. Clear the `newComment` textarea.
  */
 function handleAddComment(event) {
-  // ... your implementation here ...
-}
+    // 1. Prevent the form's default submission
+    event.preventDefault();
+    
+    // 2. Get the text from newComment.value
+    const commentText = newComment.value.trim();
+    
+    // 3. If the text is empty, return
+    if (!commentText) {
+        console.log('Comment text is empty, not submitting');
+        return;
+    }
+    
+    // 4. Create a new comment object
+    const newCommentObj = {
+        author: 'Student', // Hardcoded as 'Student'
+        text: commentText,
+        timestamp: new Date().toISOString() // Optional: add timestamp
+    };
+    
+    // 5. Add the new comment to the global currentComments array
+    currentComments.push(newCommentObj);
+    
+    // 6. Call renderComments() to refresh the list
+    renderComments();
+    
+    // 7. Clear the newComment textarea
+    newComment.value = '';}
 
 /**
  * TODO: Implement an `initializePage` function.
@@ -106,7 +191,82 @@ function handleAddComment(event) {
  * 8. If the resource is not found, display an error in `resourceTitle`.
  */
 async function initializePage() {
-  // ... your implementation here ...
+ try {
+        // 1. Get the currentResourceId
+        currentResourceId = getResourceIdFromURL();
+        
+        // 2. If no ID is found, display error and stop
+        if (!currentResourceId) {
+            if (resourceTitle) {
+                resourceTitle.textContent = "Resource not found.";
+                resourceTitle.style.color = "red";
+            }
+            console.error('No resource ID found in URL');
+            return;
+        }
+        
+        console.log(`Loading resource ID: ${currentResourceId}`);
+        
+        // 3. Fetch both JSON files using Promise.all
+        const [resourcesResponse, commentsResponse] = await Promise.all([
+            fetch(SCR/API/resources.json),
+            fetch(SCR/API/comments.json)
+        ]);
+        
+        // Check if responses are successful
+        if (!resourcesResponse.ok) {
+            throw new Error(`Failed to load resources: ${resourcesResponse.status}`);
+        }
+        
+        // 4. Parse both JSON responses
+        const resources = await resourcesResponse.json();
+        const allComments = await commentsResponse.json();
+        
+        // 5. Find the correct resource
+        const resource = resources.find(r => r.id === currentResourceId);
+        
+        // 6. Get the correct comments array
+        // Assuming resource-comments.json has structure: { "resourceId": [comments] }
+        currentComments = allComments[currentResourceId] || [];
+        
+        // 7. If resource is found
+        if (resource) {
+            // Call renderResourceDetails()
+            renderResourceDetails(resource);
+            
+            // Call renderComments()
+            renderComments();
+            
+            // Add event listener to commentForm
+            if (commentForm) {
+                commentForm.addEventListener('submit', handleAddComment);
+                console.log('Comment form event listener added');
+            }
+            
+            console.log('Page initialized successfully');
+            
+        } else {
+            // 8. If resource not found, display error
+            if (resourceTitle) {
+                resourceTitle.textContent = "Error: Resource not found.";
+                resourceTitle.style.color = "red";
+            }
+            console.error(`Resource with ID ${currentResourceId} not found`);
+        }
+        
+    } catch (error) {
+        console.error('Error initializing page:', error);
+        
+        // Display error message
+        if (resourceTitle) {
+            resourceTitle.textContent = "Error loading resource. Please try again.";
+            resourceTitle.style.color = "red";
+        }
+        
+        // Initialize with empty comments
+        currentComments = [];
+        renderComments();
+    }
 }
 
 // --- Initial Page Load ---

@@ -38,7 +38,7 @@ function createResourceArticle(resource) {
     // Create anchor tag (a) for the link
     const link = document.createElement('a');
     link.textContent = "View Resource & Discussion";
-    link.href = `details.html?id=${resource.id}`; // ✅ MUST be set to details.html?id=${id}
+    link.href = `details.html?id=${resource.id}`;
      // Append all elements to article
     article.appendChild(heading);
     article.appendChild(description);

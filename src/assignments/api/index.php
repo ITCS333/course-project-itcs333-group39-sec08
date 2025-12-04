@@ -317,7 +317,7 @@ function updateAssignment($db, $data) {
     }
 
     // TODO: Store assignment ID in variable
-    $assignmentId = $data['id'];
+    $assignmentId = $_GET['id'];
 
     // TODO: Check if assignment exists
     $checkQuery = "SELECT id FROM assignments WHERE id = :id";

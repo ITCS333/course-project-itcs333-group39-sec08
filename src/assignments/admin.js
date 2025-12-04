@@ -27,7 +27,7 @@ const assignmentsTableBody = document.querySelector("#assignments-tbody");
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
-  const { id, title, dueDate } = assignment;
+  const { id, title, due_date } = assignment;
 
   const tr = document.createElement("tr");
 
@@ -35,7 +35,7 @@ function createAssignmentRow(assignment) {
   titleTd.textContent = title;
 
   const dueDateTd = document.createElement("td");
-  dueDateTd.textContent = dueDate;
+  dueDateTd.textContent = due_date;
 
   const actionsTd = document.createElement("td");
 
@@ -144,7 +144,7 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   try {
-    const response = await fetch("assignments.json");
+    const response = await fetch("index.php?resource=assignments")
 
     
     assignments = await response.json();

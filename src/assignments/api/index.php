@@ -62,7 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // TODO: Include the database connection class
  //include '../../db.php';
- require 'db.php';
+ //require 'db.php';
+ require __DIR__ . '/../../../db.php';
 
 // TODO: Create database connection
 $db = $pdo;

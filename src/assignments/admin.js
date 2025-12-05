@@ -144,13 +144,11 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   try {
-    const response = await fetch("index.php?resource=assignments")
-
-    
+    const response = await fetch("api/index.php?resource=assignments");
     assignments = await response.json();
   } catch (error) {
-    console.error("Error loading assignments.json:", error);
- 
+    console.error("Error loading assignments", error);
+
     assignments = [];
   }
 

@@ -88,27 +88,43 @@ function renderTable() {
  * 5. Call `renderTable()` to refresh the list.
  * 6. Reset the form.
  */
-function handleAddAssignment(event) {
+async function handleAddAssignment(event) {
   event.preventDefault();
 
-    const title = document.querySelector("#assignment-title").value;
-    const description = document.querySelector("#assignment-description").value;
-    const dueDate = document.querySelector("#assignment-due-date").value;
-    const filesRaw = document.querySelector("#assignment-files").value;
+  const title = document.querySelector("#assignment-title").value;
+  const description = document.querySelector("#assignment-description").value;
+  const dueDate = document.querySelector("#assignment-due-date").value;
+  const filesRaw = document.querySelector("#assignment-files").value;
+  const files = filesRaw ? filesRaw.split("\n") : [];
 
-    const newAssignment = {
-        id: `asg_${Date.now()}`,
-        title: title,
-        description: description,
-        dueDate: dueDate,
-        files: filesRaw
-            ? filesRaw.split("\n")
-            : []
-    };
+  const payload = {
+    title: title,
+    description: description,
+    due_date: dueDate,
+    files: files,
+  };
 
-    assignments.push(newAssignment);
+  try {
+    const response = await fetch("api/index.php?resource=assignments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create assignment");
+    }
+
+    const listResponse = await fetch("api/index.php?resource=assignments");
+    assignments = await listResponse.json();
+
     renderTable();
+
     assignmentForm.reset();
+  } catch (err) {
+    console.error(err);
+    alert("Could not create assignment.");
+  }
 }
 
 /**
@@ -121,14 +137,45 @@ function handleAddAssignment(event) {
  * with the matching ID (in-memory only).
  * 4. Call `renderTable()` to refresh the list.
  */
-function handleTableClick(event) {
+async function handleTableClick(event) {
   const target = event.target;
+  
+  if (!target.classList.contains("delete-btn")) return;
 
-  if (target.classList.contains("delete-btn")) {
-    const id = target.getAttribute("data-id");
+  const id = target.getAttribute("data-id");
+  if (!id) return;
 
-    assignments = assignments.filter((assignment) => assignment.id !== id);
+  const confirmDelete = confirm("Are you sure you want to delete this assignment?");
+  if (!confirmDelete) return;
+
+  try {
+
+    const response = await fetch(
+      `api/index.php?resource=assignments&id=${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const result = await response.json();
+    console.log("deleteAssignment response:", result);
+
+    if (result.error) {
+      alert(result.error);
+      return;
+    }
+
+    if (result.success !== true) {
+      alert("Could not delete assignment.");
+      return;
+    }
+    assignments = assignments.filter(
+      (assignment) => String(assignment.id) !== String(id)
+    );
     renderTable();
+  } catch (err) {
+    console.error("Delete failed:", err);
+    alert("Could not delete assignment.");
   }
 }
 

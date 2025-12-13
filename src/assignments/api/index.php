@@ -236,9 +236,11 @@ function getAssignmentById($db, $assignmentId) {
  *   - files: Array of file URLs/paths (optional)
  * 
  * Response: JSON object with created assignment data
+ * 
  */
 function createAssignment($db, $data) {
      // TODO: Validate required fields
+    
      if (empty($data['title']) || empty($data['description']) || empty($data['due_date'])) {
         echo json_encode(['error' => 'Missing required fields']);
         return;
@@ -259,6 +261,8 @@ function createAssignment($db, $data) {
     // (Handled by AUTO_INCREMENT in DB)
 
     // TODO: Handle the 'files' field
+    
+
     $files = [];
     if (!empty($data['files']) && is_array($data['files'])) {
         $files = $data['files'];
@@ -319,7 +323,7 @@ function updateAssignment($db, $data) {
     }
 
     // TODO: Store assignment ID in variable
-    $assignmentId = $_GET['id'];
+    $assignmentId = (int)$data['id'];
 
     // TODO: Check if assignment exists
     $checkQuery = "SELECT id FROM assignments WHERE id = :id";
@@ -437,10 +441,10 @@ function deleteAssignment($db, $assignmentId) {
     }
 
     // TODO: Delete associated comments first (due to foreign key constraint)
-    $delComSql = "DELETE FROM comments WHERE assignment_id = :id";
-    $delComStmt = $db->prepare($delComSql);
-    $delComStmt->bindValue(':id', $assignmentId);
-    $delComStmt->execute();
+    //$delComSql = "DELETE FROM comments WHERE assignment_id = :id";
+    //$delComStmt = $db->prepare($delComSql);
+    //$delComStmt->bindValue(':id', $assignmentId);
+    //$delComStmt->execute();
 
     // TODO: Prepare DELETE query for assignment
     $delSql = "DELETE FROM assignments WHERE id = :id";

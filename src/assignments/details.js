@@ -63,6 +63,7 @@ function createCommentArticle(comment) {
   const textP = document.createElement("p");
   textP.textContent = comment.text;
 
+  const footer = document.createElement("footer");
   footer.textContent = "Posted by: " + comment.author;
 
   article.appendChild(textP);
@@ -136,30 +137,64 @@ function handleAddComment(event) {
  */
 async function initializePage() {
   currentAssignmentId = getAssignmentIdFromURL();
+
   if (!currentAssignmentId) {
     console.error("No assignment ID found in URL.");
-    return;
-  }
-  const [assignmentsResponse, commentsResponse] = await Promise.all([
-    fetch("assignments.json"),
-    fetch("comments.json")
-  ]);
-
-  const assignmentsData = await assignmentsResponse.json();
-  const commentsData = await commentsResponse.json();
-
-  const assignment = assignmentsData.find(a => a.id === currentAssignmentId);
-  currentComments = commentsData[currentAssignmentId] || [];
-
-  if (!assignment) {
-    assignmentTitle.textContent = "Assignment not found.";
+    assignmentTitle.textContent = "No assignment ID found in URL.";
     return;
   }
 
-  renderAssignmentDetails(assignment);
-  renderComments();
-  commentForm.addEventListener("submit", handleAddComment);
+  try {
+    // Get all assignments from the API (DB instead of assignments.json)
+    const response = await fetch("api/index.php?resource=assignments");
+    const assignments = await response.json();
+
+    // Find the assignment with the matching ID
+    const assignment = assignments.find(
+      (a) => String(a.id) === String(currentAssignmentId)
+    );
+
+    if (!assignment) {
+      assignmentTitle.textContent = "Assignment not found.";
+      return;
+    }
+
+    currentComments = [];
+
+    renderAssignmentDetails(assignment);
+    renderComments();
+
+    commentForm.addEventListener("submit", handleAddComment);
+  } catch (error) {
+    console.error("Error while initializing page:", error);
+    assignmentTitle.textContent =
+      "Error: could not load assignment from server.";
+  }
 
 }
+/*
 
-initializePage();
+currentAssignmentId = getAssignmentIdFromURL();
+
+  if (!currentAssignmentId) {
+    console.error("No assignment ID found in URL.");
+    assignmentTitle.textContent = "No assignment ID found in URL.";
+    return;
+  }
+
+  try {
+    const assignment = await apiRequest(`?action=read&id=${currentAssignmentId}`);
+    const comments = await apiRequest(`?action=comments&id=${currentAssignmentId}`);
+
+    currentComments = Array.isArray(comments) ? comments : [];
+
+    renderAssignmentDetails(assignment);
+    renderComments();
+    commentForm.addEventListener("submit", handleAddComment);
+  } catch (error) {
+    console.error("Error while initializing page:", error);
+    assignmentTitle.textContent = "Error: could not load assignment from server.";
+  }
+      */
+
+  document.addEventListener("DOMContentLoaded", initializePage);

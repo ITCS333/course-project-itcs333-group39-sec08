@@ -9,36 +9,129 @@
 <html lang="en">
 <head>
     <!-- TODO: Add meta tags for charset and viewport. -->
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- TODO: Add a title, e.g., "Weekly Course Breakdown". -->
+    <title>Weekly Course Breakdown</title>
 
     <!-- TODO: Link to your CSS framework or stylesheet. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+    <style>
+        :root{
+            --primary: #0066cc;
+            --primary-600: #0055aa;
+            --surface: #ffffff;
+            --muted: #6c757d;
+            --border: #e9ecef;
+        }
+
+        body{
+            padding: 1.5rem;
+            margin: 0;
+            background: #f8fafc;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #000000;
+            line-height: 1.5;
+        }
+
+        .container{
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 14px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(3,38,76,0.05);
+        }
+
+    header{ text-align:center; margin-bottom:2rem; }
+    header h1{ color: #000000; font-size:2rem; margin:0; }
+
+        section.weeks-list{ display:block; }
+
+        article{ 
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:1rem 1.25rem;
+            margin-bottom:1rem;
+            background: var(--surface);
+            box-shadow: 0 6px 18px rgba(3,38,76,0.03);
+        }
+
+        article h2{ margin:0 0 .5rem 0; color: #1a365d; font-size:1.1rem; }
+        article p{ margin:.25rem 0; color: #465055; }
+
+        a.detail-link{
+            display:inline-block;
+            margin-top:.5rem;
+            padding:.45rem .85rem;
+            background:var(--primary);
+            color:#fff;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:600;
+            transition: background-color .18s ease, transform .18s ease;
+        }
+
+        a.detail-link:hover{ background: var(--primary-600); transform: translateY(-2px); }
+
+        @media (max-width:768px){
+            .container{ padding:1rem; margin: .5rem; }
+            article{ padding:.85rem; }
+        }
+    </style>
 </head>
 <body>
 
     <!-- TODO: Create a 'header' with a main heading ('h1') "Weekly Course Breakdown". -->
+    <header>
+        <h1>Weekly Course Breakdown</h1>
+    </header>
 
     <!-- TODO: Create the 'main' content area. -->
-        <!-- TODO: Create a 'section' to contain the list of weeks. -->
-            <!-- TODO: Add 2-3 dummy weekly entries using the structure below. -->
+    <main class="container">
+    <!-- TODO: Create a 'section' to contain the list of weeks. -->
+    <section id="week-list-section" aria-label="Weeks list" class="weeks-list">
 
-            <!-- Example Week 1: -->
+            <!-- Week 1 Example -->
             <!-- TODO: Use an 'article' element for each week to group its content semantically. -->
+            <article>
                 <!-- TODO: Add a heading ('h2') for the week's title (e.g., "Week 1: Introduction to HTML"). -->
+                <h2>Week 1: Introduction to HTML</h2>
+
                 <!-- TODO: Add a paragraph ('p') to display the start date, e.g., "Starts on: YYYY-MM-DD". -->
+                <p>Starts on: 2025-02-01</p>
+
                 <!-- TODO: Add a paragraph ('p') for a brief description of the week. -->
-                <!-- TODO: Add an anchor tag ('a') that links to the detail page. 
-                     - For now, the 'href' can be "week-detail.html".
-                     - The link text should be "View Details & Discussion". -->
-            <!-- End of article. -->
+                <p>This week introduces students to the basics of HTML structure and tags.</p>
 
-            <!-- Example Week 2: -->
-            <!-- TODO: Create a second 'article' for another week. -->
-                <!-- TODO: Add a heading, a paragraph for the start date, a paragraph for the description, and an anchor tag linking to "week-detail.html". -->
-            <!-- End of article. -->
+                <!-- TODO: Add an anchor tag ('a') that links to the detail page. -->
+                <a href="week-detail.html">View Details & Discussion</a>
+            </article>
 
+            <!-- Week 2 Example -->
+            <article>
+                <h2>Week 2: CSS Fundamentals</h2>
+                <p>Starts on: 2025-02-08</p>
+                <p>Students will learn core CSS concepts such as selectors, colors, and layout.</p>
+                <a href="week-detail.html">View Details & Discussion</a>
+            </article>
+
+            <!-- Week 3 Example -->
+            <article>
+                <h2>Week 3: JavaScript Basics</h2>
+                <p>Starts on: 2025-02-15</p>
+                <p>Introduction to scripting with variables, functions, and simple DOM manipulation.</p>
+                <a href="week-detail.html">View Details & Discussion</a>
+            </article>
+
+        </section>
         <!-- End of weekly list section. -->
+    </main>
     <!-- End of main. -->
+
+    <!-- page script: populates the week list -->
+    <script src="list.js" defer></script>
 
 </body>
 </html>

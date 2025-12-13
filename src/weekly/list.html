@@ -1,13 +1,21 @@
+<!--
+  Requirement: Create the Student View for the Weekly Breakdown
+
+  Instructions:
+  This page is a read-only view for students to see the plan for all weeks.
+  Each week should link to its dedicated detail page.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
+    <!-- TODO: Add meta tags for charset and viewport. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- TODO: Add a title, e.g., "Weekly Course Breakdown". -->
     <title>Weekly Course Breakdown</title>
 
-    <!-- Simple CSS framework -->
+    <!-- TODO: Link to your CSS framework or stylesheet. -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
     <style>
         :root{
@@ -36,12 +44,12 @@
             box-shadow: 0 8px 30px rgba(3,38,76,0.05);
         }
 
-        header{ text-align:center; margin-bottom:2rem; }
-        header h1{ color: #000000; font-size:2rem; margin:0; }
+    header{ text-align:center; margin-bottom:2rem; }
+    header h1{ color: #000000; font-size:2rem; margin:0; }
 
         section.weeks-list{ display:block; }
 
-        article{
+        article{ 
             border:1px solid var(--border);
             border-radius:12px;
             padding:1rem 1.25rem;
@@ -75,42 +83,52 @@
 </head>
 <body>
 
+    <!-- TODO: Create a 'header' with a main heading ('h1') "Weekly Course Breakdown". -->
+    <header>
+        <h1>Weekly Course Breakdown</h1>
+    </header>
+
+    <!-- TODO: Create the 'main' content area. -->
     <main class="container">
-        <!-- Header moved inside main so it's part of the page container -->
-        <header>
-            <h1>Weekly Course Breakdown</h1>
-        </header>
+    <!-- TODO: Create a 'section' to contain the list of weeks. -->
+    <section id="week-list-section" aria-label="Weeks list" class="weeks-list">
 
-        <!-- Weeks list section -->
-        <section id="week-list-section" aria-label="Weeks list" class="weeks-list">
-
-            <!-- Week 1 -->
+            <!-- Week 1 Example -->
+            <!-- TODO: Use an 'article' element for each week to group its content semantically. -->
             <article>
+                <!-- TODO: Add a heading ('h2') for the week's title (e.g., "Week 1: Introduction to HTML"). -->
                 <h2>Week 1: Introduction to HTML</h2>
+
+                <!-- TODO: Add a paragraph ('p') to display the start date, e.g., "Starts on: YYYY-MM-DD". -->
                 <p>Starts on: 2025-02-01</p>
+
+                <!-- TODO: Add a paragraph ('p') for a brief description of the week. -->
                 <p>This week introduces students to the basics of HTML structure and tags.</p>
-                <!-- Added class "detail-link" to match styles and query parameter so each week links to its dedicated detail page -->
-                <a class="detail-link" href="week-detail.html?week=1" aria-label="View details and discussion for week 1">View Details &amp; Discussion</a>
+
+                <!-- TODO: Add an anchor tag ('a') that links to the detail page. -->
+                <a href="week-detail.html">View Details & Discussion</a>
             </article>
 
-            <!-- Week 2 -->
+            <!-- Week 2 Example -->
             <article>
                 <h2>Week 2: CSS Fundamentals</h2>
                 <p>Starts on: 2025-02-08</p>
                 <p>Students will learn core CSS concepts such as selectors, colors, and layout.</p>
-                <a class="detail-link" href="week-detail.html?week=2" aria-label="View details and discussion for week 2">View Details &amp; Discussion</a>
+                <a href="week-detail.html">View Details & Discussion</a>
             </article>
 
-            <!-- Week 3 -->
+            <!-- Week 3 Example -->
             <article>
                 <h2>Week 3: JavaScript Basics</h2>
                 <p>Starts on: 2025-02-15</p>
                 <p>Introduction to scripting with variables, functions, and simple DOM manipulation.</p>
-                <a class="detail-link" href="week-detail.html?week=3" aria-label="View details and discussion for week 3">View Details &amp; Discussion</a>
+                <a href="week-detail.html">View Details & Discussion</a>
             </article>
 
         </section>
+        <!-- End of weekly list section. -->
     </main>
+    <!-- End of main. -->
 
     <!-- page script: populates the week list -->
     <script src="list.js" defer></script>

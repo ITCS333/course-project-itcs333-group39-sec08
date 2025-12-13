@@ -1,98 +1,203 @@
 /*
-  Requirement: Make the "Manage Weekly Breakdown" page interactive.
-
-  Instructions:
-  1. Link this file to `admin.html` using:
-     <script src="admin.js" defer></script>
-  
-  2. In `admin.html`, add an `id="weeks-tbody"` to the <tbody> element
-     inside your `weeks-table`.
-  
-  3. Implement the TODOs below.
+  admin.js - Manage Weekly Breakdown (client-side)
+  - Add / Edit / Delete weeks in-memory
+  - Validation and a modal confirmation for deletes
 */
 
-// --- Global Data Store ---
-// This will hold the weekly data loaded from the JSON file.
 let weeks = [];
+const __DEBUG = false;
 
-// --- Element Selections ---
-// TODO: Select the week form ('#week-form').
+const weekForm = document.querySelector('#week-form');
+const weeksTableBody = document.querySelector('#weeks-tbody');
 
-// TODO: Select the weeks table body ('#weeks-tbody').
-
-// --- Functions ---
-
-/**
- * TODO: Implement the createWeekRow function.
- * It takes one week object {id, title, description}.
- * It should return a <tr> element with the following <td>s:
- * 1. A <td> for the `title`.
- * 2. A <td> for the `description`.
- * 3. A <td> containing two buttons:
- * - An "Edit" button with class "edit-btn" and `data-id="${id}"`.
- * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
- */
 function createWeekRow(week) {
-  // ... your implementation here ...
+  const tr = document.createElement('tr');
+  if (week && week.id) tr.setAttribute('data-id', week.id);
+  const tdTitle = document.createElement('td');
+  tdTitle.textContent = week.title || '';
+  tr.appendChild(tdTitle);
+
+  const tdDesc = document.createElement('td');
+  tdDesc.textContent = week.description || '';
+  tr.appendChild(tdDesc);
+
+  const tdActions = document.createElement('td');
+  const group = document.createElement('div');
+  group.className = 'button-group';
+
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'edit edit-btn';
+  editBtn.setAttribute('data-id', week.id || '');
+  editBtn.textContent = 'Edit';
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'delete delete-btn secondary';
+  deleteBtn.setAttribute('data-id', week.id || '');
+  deleteBtn.textContent = 'Delete';
+
+  group.appendChild(editBtn);
+  group.appendChild(deleteBtn);
+  tdActions.appendChild(group);
+  tr.appendChild(tdActions);
+  return tr;
 }
 
-/**
- * TODO: Implement the renderTable function.
- * It should:
- * 1. Clear the `weeksTableBody`.
- * 2. Loop through the global `weeks` array.
- * 3. For each week, call `createWeekRow()`, and
- * append the resulting <tr> to `weeksTableBody`.
- */
 function renderTable() {
-  // ... your implementation here ...
+  if (!weeksTableBody) return;
+  weeksTableBody.innerHTML = '';
+  weeks.forEach(w => weeksTableBody.appendChild(createWeekRow(w)));
 }
 
-/**
- * TODO: Implement the handleAddWeek function.
- * This is the event handler for the form's 'submit' event.
- * It should:
- * 1. Prevent the form's default submission.
- * 2. Get the values from the title, start date, and description inputs.
- * 3. Get the value from the 'week-links' textarea. Split this value
- * by newlines (`\n`) to create an array of link strings.
- * 4. Create a new week object with a unique ID (e.g., `id: \`week_${Date.now()}\``).
- * 5. Add this new week object to the global `weeks` array (in-memory only).
- * 6. Call `renderTable()` to refresh the list.
- * 7. Reset the form.
- */
 function handleAddWeek(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+  if (!weekForm) return;
+  const titleInput = weekForm.querySelector('#week-title');
+  const startDateInput = weekForm.querySelector('#week-start-date');
+  const descInput = weekForm.querySelector('#week-description');
+  const linksInput = weekForm.querySelector('#week-links');
+
+  const title = titleInput ? titleInput.value.trim() : '';
+  const startDate = startDateInput ? startDateInput.value : '';
+  const description = descInput ? descInput.value.trim() : '';
+  const linksRaw = linksInput ? linksInput.value.trim() : '';
+  const links = linksRaw ? linksRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+
+  const newWeek = { id: `week_${Date.now()}`, title, startDate, description, links };
+
+  // editing
+  if (typeof window !== 'undefined' && window.__editingWeekId) {
+    const editId = window.__editingWeekId;
+    const idx = weeks.findIndex(w => String(w.id) === String(editId));
+    if (idx >= 0) {
+      weeks[idx] = Object.assign({}, weeks[idx], { title, startDate, description, links });
+      window.__editingWeekId = null;
+      const addBtn = document.getElementById('add-week'); if (addBtn) addBtn.textContent = 'Add Week';
+      // remove editing highlight if present
+      try { if (window.__editingRowElement && window.__editingRowElement.classList) window.__editingRowElement.classList.remove('editing'); window.__editingRowElement = null; } catch (err) {}
+      renderTable(); weekForm.reset(); return;
+    }
+  }
+
+  weeks.push(newWeek);
+  renderTable();
+  weekForm.reset();
 }
 
-/**
- * TODO: Implement the handleTableClick function.
- * This is an event listener on the `weeksTableBody` (for delegation).
- * It should:
- * 1. Check if the clicked element (`event.target`) has the class "delete-btn".
- * 2. If it does, get the `data-id` attribute from the button.
- * 3. Update the global `weeks` array by filtering out the week
- * with the matching ID (in-memory only).
- * 4. Call `renderTable()` to refresh the list.
- */
-function handleTableClick(event) {
-  // ... your implementation here ...
+function showConfirmModal(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('confirm-modal');
+    const msgEl = document.getElementById('confirm-message');
+    const confirmBtn = document.getElementById('confirm-delete');
+    const cancelBtn = document.getElementById('cancel-delete');
+    if (!modal || !msgEl || !confirmBtn || !cancelBtn) {
+      resolve(Boolean(window.confirm(message)));
+      return;
+    }
+    msgEl.textContent = message;
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden', 'false');
+
+    const cleanup = () => {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+    };
+
+    const onConfirm = () => { cleanup(); resolve(true); };
+    const onCancel = () => { cleanup(); resolve(false); };
+    const onBackdrop = (e) => { if (e.target === modal || e.target.classList.contains('confirm-backdrop')) onCancel(); };
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+    confirmBtn.focus();
+  });
 }
 
-/**
- * TODO: Implement the loadAndInitialize function.
- * This function needs to be 'async'.
- * It should:
- * 1. Use `fetch()` to get data from 'weeks.json'.
- * 2. Parse the JSON response and store the result in the global `weeks` array.
- * 3. Call `renderTable()` to populate the table for the first time.
- * 4. Add the 'submit' event listener to `weekForm` (calls `handleAddWeek`).
- * 5. Add the 'click' event listener to `weeksTableBody` (calls `handleTableClick`).
- */
+async function handleTableClick(event) {
+  const btn = event.target.closest && event.target.closest('button');
+  const target = btn || event.target;
+  if (!target) return;
+  if (__DEBUG) console.debug('[admin] click', target, 'classes=', target.className);
+
+  // Delete
+  if (target.classList.contains('delete-btn') || target.classList.contains('delete')) {
+    const id = target.getAttribute('data-id');
+    let titleToDelete = null;
+    if (id) {
+      const wk = weeks.find(w => String(w.id) === String(id)); if (wk) titleToDelete = wk.title || id;
+    }
+    if (!titleToDelete) {
+      const tr = target.closest && target.closest('tr'); if (tr) { const firstTd = tr.querySelector('td'); if (firstTd) titleToDelete = firstTd.textContent.trim(); }
+    }
+    const promptText = titleToDelete ? `Are you sure you want to delete the week "${titleToDelete}"?` : 'Are you sure you want to delete this week?';
+    const ok = await showConfirmModal(promptText);
+    if (!ok) return;
+    if (id) { weeks = weeks.filter(w => String(w.id) !== String(id)); renderTable(); return; }
+    const tr = target.closest && target.closest('tr'); if (tr) tr.remove(); return;
+  }
+
+  // Edit
+  if (target.classList.contains('edit-btn') || target.classList.contains('edit')) {
+    const id = target.getAttribute('data-id');
+    if (!id || !weekForm) return;
+    const wk = weeks.find(w => String(w.id) === String(id));
+    if (!wk) return;
+    const titleInput = weekForm.querySelector('#week-title');
+    const startDateInput = weekForm.querySelector('#week-start-date');
+    const descInput = weekForm.querySelector('#week-description');
+    const linksInput = weekForm.querySelector('#week-links');
+    if (titleInput) titleInput.value = wk.title || '';
+    if (startDateInput) startDateInput.value = wk.startDate || '';
+    if (descInput) descInput.value = wk.description || '';
+    if (linksInput) linksInput.value = Array.isArray(wk.links) ? wk.links.join('\n') : '';
+    if (typeof window !== 'undefined') window.__editingWeekId = id;
+    const addBtn = document.getElementById('add-week');
+    if (addBtn) addBtn.textContent = 'Update';
+
+    // Highlight the row being edited
+    try {
+      if (window.__editingRowElement && window.__editingRowElement.classList) {
+        window.__editingRowElement.classList.remove('editing');
+      }
+      const tr = target.closest && target.closest('tr');
+      if (tr) {
+        tr.classList.add('editing');
+        window.__editingRowElement = tr;
+      }
+    } catch (err) { /* ignore */ }
+
+    // Smoothly scroll the form into view but keep the edited row visible by offsetting for the header height
+    (function scrollToFormWithOffset(){
+      const form = document.getElementById('form-section');
+      if (!form) return;
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight + 12 : 12; // small gap
+      const top = form.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    })();
+
+    return;
+  }
+}
+
 async function loadAndInitialize() {
-  // ... your implementation here ...
+  try {
+    const res = await fetch('api/weeks.json');
+    if (!res.ok) { weeks = []; }
+    else { const data = await res.json(); weeks = Array.isArray(data) ? data : []; }
+  } catch (err) { console.warn('Failed to load weeks.json', err); weeks = []; }
+  renderTable();
+  if (weekForm) weekForm.addEventListener('submit', handleAddWeek);
+  if (weeksTableBody) weeksTableBody.addEventListener('click', handleTableClick);
+  document.addEventListener('click', function (e) {
+    const b = e.target.closest && e.target.closest('button'); if (!b) return; const cls = b.className || '';
+    if (cls.includes('delete') || cls.includes('edit')) { try { handleTableClick(e); } catch (err) { console.error(err); } }
+  });
 }
 
-// --- Initial Page Load ---
-// Call the main async function to start the application.
 loadAndInitialize();

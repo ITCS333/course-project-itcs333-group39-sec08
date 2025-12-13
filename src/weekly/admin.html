@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Character encoding -->
+    <!-- TODO: #1 Add the 'meta' tag for character encoding (UTF-8). -->
     <meta charset="utf-8">
-
-    <!-- Responsive viewport -->
+    
+    <!-- TODO: Add the responsive 'viewport' meta tag. -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- TODO: Add a title, e.g., "Manage Weekly Breakdown". -->
     <title>Manage Weekly Breakdown</title>
 
-    <!-- Pico.css for quick styling -->
+    <!-- TODO: Link to your CSS framework or stylesheet. -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
     
     <style>
@@ -76,11 +77,12 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border);
+            border: 2px solid #000000;
         }
 
         table th {
             background-color: rgba(149, 152, 156, 0.06);
+             
             color: var(--primary);
             font-weight: 600;
             padding: 1rem;
@@ -106,7 +108,6 @@
             --muted: #6c757d;
             --surface: #ffffff;
             --border: #e9ecef;
-            --accent: #0055aa; /* defined to avoid invalid var usage on focus */
         }
 
         /* Buttons: unified smooth styling using --primary */
@@ -309,68 +310,103 @@
     </style>
 </head>
 <body>
+    <!-- TODO: Create a 'header' with a main heading ('h1') "Manage Weekly Breakdown". -->
     <header>
         <h1>Manage Weekly Breakdown</h1>
     </header>
 
-    <main id="main" class="container" role="main">
+    <!-- TODO: Create the 'main' content area. -->
+    <main class="container">
         <!-- Section 1: Add/Edit Week Form -->
+        <!-- TODO: Create a 'section' for the form. -->
         <section id="form-section">
+            <!-- TODO: Add a sub-heading ('h2') "Add a New Week". -->
             <h2>Add a New Week</h2>
 
-            <form id="week-form" action="#" novalidate>
+            <!-- TODO: Create a 'form' with an id "week-form". Action can be '#'. -->
+            <form id="week-form" action="#">
+                <!-- TODO: Use a 'fieldset' to group the form controls. -->
                 <fieldset>
+                    <!-- TODO: Add a 'legend', e.g., "Weekly Details". -->
                     <legend>Weekly Details</legend>
 
+                    <!-- TODO: Add a 'label' and 'input' for the week's title.
+                         - label 'for': "week-title"
+                         - input 'id': "week-title", type="text", required
+                         - Example placeholder: "Week 1: Introduction to HTML" -->
                     <label for="week-title">Week Title:</label>
-                    <input id="week-title" name="week-title" type="text" placeholder="Week 1: Introduction to HTML" required>
+                    <input id="week-title" type="text" placeholder="Week 1: Introduction to HTML" required>
 
+                    <!-- TODO: Add a 'label' and 'input' for the week's starting date.
+                         - label 'for': "week-start-date"
+                         - input 'id': "week-start-date", type="date", required -->
                     <label for="week-start-date">Start Date:</label>
-                    <input id="week-start-date" name="week-start-date" type="date" required>
+                    <input id="week-start-date" type="date" required>
 
+                    <!-- TODO: Add a 'label' and 'textarea' for the week's description and notes.
+                         - label 'for': "week-description"
+                         - textarea 'id': "week-description", rows="5" -->
                     <label for="week-description">Description and Notes:</label>
-                    <textarea id="week-description" name="week-description" rows="5" placeholder="Enter detailed description and notes for this week..."></textarea>
+                    <textarea id="week-description" rows="5" placeholder="Enter detailed description and notes for this week..."></textarea>
                     
+                    <!-- TODO: Add a 'label' and 'textarea' for links to exercises or resources (one link per line).
+                         - label 'for': "week-links"
+                         - textarea 'id': "week-links", rows="3" -->
                     <label for="week-links">Resources or Exercise Links:</label>
-                    <textarea id="week-links" name="week-links" rows="3" placeholder="Enter one link per line..."></textarea>
+                    <textarea id="week-links" rows="3" placeholder="Enter one link per line..."></textarea>
 
+                    <!-- TODO: Add a 'button' to submit the form.
+                         - id="add-week", type="submit", Text: "Add Week" -->
                     <button id="add-week" type="submit">Add Week</button>
                 </fieldset>
             </form>
         </section>
 
         <!-- Section 2: Existing Weekly Entries -->
+        <!-- TODO: Create a 'section' to display the list of current weeks. -->
         <section id="table-section">
+            <!-- TODO: Add a sub-heading ('h2') "Current Weekly Breakdown". -->
             <h2>Current Weekly Breakdown</h2>
 
+            <!-- TODO: Create a 'table' with id "weeks-table". -->
             <table id="weeks-table">
+                <!-- TODO: Create a 'thead' and a 'tr' inside it. -->
                 <thead>
                     <tr>
+                        <!-- TODO: Add 'th' elements for "Week Title", "Description", and "Actions". -->
                         <th>Week Title</th>
                         <th>Description</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 
+                <!-- TODO: Create a 'tbody' for the data. -->
                 <tbody id="weeks-tbody">
+                    <!-- TODO: Add 1-2 rows of dummy data to see the structure. -->
+                    <!-- Example Row 1: -->
                     <tr>
+                        <!-- TODO: Create a 'tr' for the first week. -->
+                        <!-- TODO: Add 'td' cells for a title (e.g., "Week 1: Intro to HTML") and a short description. -->
                         <td>Week 1: Intro to HTML</td>
                         <td>Basic tags, structure of an HTML document.</td>
+                        <!-- TODO: Add a 'td' containing the action buttons. -->
                         <td>
                             <div class="button-group">
-                                <button type="button" class="edit" aria-label="Edit Week 1">Edit</button>
-                                <button type="button" class="delete" aria-label="Delete Week 1">Delete</button>
+                                <!-- Edit/Delete with explicit types and classes for script handling -->
+                                <button type="button" class="edit">Edit</button>
+                                <button type="button" class="delete">Delete</button>
                             </div>
                         </td>
                     </tr>
                     
+                    <!-- Example Row 2: -->
                     <tr>
                         <td>Week 2: CSS Fundamentals</td>
                         <td>Selectors, properties, and basic styling.</td>
                         <td>
                             <div class="button-group">
-                                <button type="button" class="edit" aria-label="Edit Week 2">Edit</button>
-                                <button type="button" class="delete" aria-label="Delete Week 2">Delete</button>
+                                <button type="button" class="edit">Edit</button>
+                                <button type="button" class="delete">Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -381,9 +417,8 @@
     
     <script>
         (function(){
-            // Prefer the explicit tbody id; fall back to selector for robustness
-            const tbody = document.getElementById('weeks-tbody') || document.querySelector('#weeks-table tbody');
             const weekForm = document.getElementById('week-form');
+            const tbody = document.querySelector('#weeks-table tbody');
 
             function escapeHtml(s){
                 return String(s || '')
@@ -401,8 +436,8 @@
                     <td>${escapeHtml(desc)}</td>
                     <td>
                         <div class="button-group">
-                            <button type="button" class="edit" aria-label="Edit ${escapeHtml(title)}">Edit</button>
-                            <button type="button" class="delete" aria-label="Delete ${escapeHtml(title)}">Delete</button>
+                            <button type="button" class="edit">Edit</button>
+                            <button type="button" class="delete">Delete</button>
                         </div>
                     </td>`;
                 return tr;
@@ -413,14 +448,9 @@
             if (weekForm){
                 weekForm.addEventListener('submit', function(e){
                     e.preventDefault();
-
                     const title = document.getElementById('week-title').value.trim();
                     const desc = document.getElementById('week-description').value.trim();
-
-                    if (!title){
-                        alert('Please enter a week title.');
-                        return;
-                    }
+                    if (!title){ alert('Please enter a week title.'); return; }
 
                     const addBtn = document.getElementById('add-week');
 
@@ -436,39 +466,26 @@
                         if (addBtn) addBtn.textContent = 'Add Week';
                     } else {
                         // Add new row
-                        if (!tbody) {
-                            console.error('Table body not found; cannot append new row.');
-                        } else {
-                            const row = createRow(title, desc);
-                            tbody.appendChild(row);
-                            console.log('Added week:', title);
-                        }
+                        const row = createRow(title, desc);
+                        tbody.appendChild(row);
+                        console.log('Added week:', title);
                     }
 
                     weekForm.reset();
                 });
             }
 
-            // Event delegation handler for edit/delete
+            // Robust event delegation for edit/delete
             function handleRowAction(e){
                 // find closest action button (supports clicking inner elements)
-                const bt = e.target && e.target.closest && e.target.closest('button.edit, button.delete');
+                const bt = e.target && (e.target.closest && (e.target.closest('button.edit, button.delete')));
                 if (!bt) return;
-
-                // Only preventDefault for button clicks
                 e.preventDefault();
-
+                console.log('Action button clicked:', bt.className);
                 if (bt.classList.contains('delete')){
                     const tr = bt.closest('tr');
                     if (!tr) return;
                     if (confirm('Delete this week?')){
-                        // if currently editing this row, cancel edit mode
-                        const addBtn = document.getElementById('add-week');
-                        if (editingRow === tr){
-                            editingRow = null;
-                            if (addBtn) addBtn.textContent = 'Add Week';
-                            weekForm.reset();
-                        }
                         tr.remove();
                         console.log('Row deleted');
                     }
@@ -480,13 +497,12 @@
                     const desc = tds[1].textContent.trim();
                     document.getElementById('week-title').value = title;
                     document.getElementById('week-description').value = desc;
-
-                    // enter edit mode
+                    // enter edit mode: keep reference to the row and change button label
                     editingRow = tr;
                     const addBtn = document.getElementById('add-week');
                     if (addBtn) addBtn.textContent = 'Update Week';
-
-                    // Smooth scroll the form into view (offset for header)
+                    // Smoothly scroll the form into view but keep the edited row visible
+                    // by offsetting for the header height so the week doesn't disappear underneath.
                     (function scrollToFormWithOffset(){
                         const form = document.getElementById('form-section');
                         if (!form) return;
@@ -498,15 +514,9 @@
                 }
             }
 
-            // Attach delegation to the tbody if available, otherwise attach to table as fallback
-            if (tbody) {
-                tbody.addEventListener('click', handleRowAction);
-            } else {
-                const table = document.getElementById('weeks-table');
-                if (table) table.addEventListener('click', handleRowAction);
-            }
+            if (tbody) tbody.addEventListener('click', handleRowAction);
 
-            // Extra safety: generic click listener scoped to table element (helps if delegation misses)
+            // fallback: catch clicks anywhere inside table (helps if delegation misses)
             document.addEventListener('click', function(e){
                 const table = e.target && e.target.closest && e.target.closest('#weeks-table');
                 if (!table) return;

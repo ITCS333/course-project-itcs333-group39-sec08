@@ -1,18 +1,24 @@
+<!--
+  Requirement: Create the Student View for the Weekly Breakdown
+
+  Instructions:
+  This page is a read-only view for students to see the plan for all weeks.
+  Each week should link to its dedicated detail page.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- TODO: Add meta tags for charset and viewport. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- TODO: Add a title, e.g., "Weekly Course Breakdown". -->
     <title>Weekly Course Breakdown</title>
-    
-    <!-- Added proper Pico CSS link with integrity check -->
-    <link rel="stylesheet" 
-          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" 
-          integrity="sha384-9qRk7S+9bW7c7k8q8q7q8q7q8q7q8q7q8q7q8q7q8q7q8q7q8q7q8q7q8q7q8q7" 
-          crossorigin="anonymous">
-    
+
+    <!-- TODO: Link to your CSS framework or stylesheet. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
     <style>
-        :root {
+        :root{
             --primary: #0066cc;
             --primary-600: #0055aa;
             --surface: #ffffff;
@@ -20,248 +26,112 @@
             --border: #e9ecef;
         }
 
-        body {
+        body{
             padding: 1.5rem;
             margin: 0;
             background: #f8fafc;
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: #000000;
-            line-height: 1.6; /* Improved readability */
+            line-height: 1.5;
         }
 
-        .container {
+        .container{
             max-width: 1000px;
             margin: 0 auto;
             background: var(--surface);
             border-radius: 14px;
             padding: 2rem;
-            box-shadow: 0 8px 30px rgba(3, 38, 76, 0.05);
+            box-shadow: 0 8px 30px rgba(3,38,76,0.05);
         }
 
-        header { 
-            text-align: center; 
-            margin-bottom: 2.5rem; /* Increased spacing */
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-        }
-        
-        header h1 { 
-            color: #1a365d; /* Better contrast */
-            font-size: 2.25rem; /* Slightly larger */
-            margin: 0 0 0.5rem 0; 
-            font-weight: 700;
-        }
-        
-        header p {
-            color: var(--muted);
-            font-size: 1.1rem;
-            margin: 0;
-        }
+    header{ text-align:center; margin-bottom:2rem; }
+    header h1{ color: #000000; font-size:2rem; margin:0; }
 
-        section.weeks-list { 
-            display: block; 
-        }
+        section.weeks-list{ display:block; }
 
-        article { 
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem; /* Increased padding */
-            margin-bottom: 1.25rem; /* Increased spacing */
+        article{ 
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:1rem 1.25rem;
+            margin-bottom:1rem;
             background: var(--surface);
-            box-shadow: 0 6px 18px rgba(3, 38, 76, 0.03);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        article:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(3, 38, 76, 0.08);
+            box-shadow: 0 6px 18px rgba(3,38,76,0.03);
         }
 
-        article h2 { 
-            margin: 0 0 0.75rem 0; /* Increased spacing */
-            color: #1a365d; 
-            font-size: 1.3rem; /* Slightly larger */
-            font-weight: 600;
-        }
-        
-        article h2 span.week-number {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 32px;
-            margin-right: 10px;
-            font-size: 0.9rem;
-        }
-        
-        article p { 
-            margin: 0.5rem 0; /* Increased spacing */
-            color: #465055; 
-        }
-        
-        article .start-date {
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        article .description {
-            margin: 1rem 0; /* More space for description */
+        article h2{ margin:0 0 .5rem 0; color: #1a365d; font-size:1.1rem; }
+        article p{ margin:.25rem 0; color: #465055; }
+
+        a.detail-link{
+            display:inline-block;
+            margin-top:.5rem;
+            padding:.45rem .85rem;
+            background:var(--primary);
+            color:#fff;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:600;
+            transition: background-color .18s ease, transform .18s ease;
         }
 
-        a.detail-link {
-            display: inline-block;
-            margin-top: 1rem; /* Increased spacing */
-            padding: 0.6rem 1.2rem; /* Better padding */
-            background: var(--primary);
-            color: #fff !important; /* Ensure color contrast */
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
+        a.detail-link:hover{ background: var(--primary-600); transform: translateY(-2px); }
 
-        a.detail-link:hover { 
-            background: var(--primary-600); 
-            transform: translateY(-2px); 
-            text-decoration: none; /* Remove underline on hover */
-        }
-        
-        a.detail-link:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
-
-        /* Add skip link for accessibility */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            background: var(--primary);
-            color: white;
-            padding: 8px;
-            z-index: 100;
-            text-decoration: none;
-        }
-        
-        .skip-link:focus {
-            top: 0;
-        }
-
-        @media (max-width: 768px) {
-            .container { 
-                padding: 1.25rem; 
-                margin: 0.75rem; 
-            }
-            article { 
-                padding: 1.25rem; 
-            }
-            header h1 {
-                font-size: 1.8rem;
-            }
-        }
-        
-        /* Print styles */
-        @media print {
-            .container {
-                box-shadow: none;
-                padding: 0;
-            }
-            a.detail-link {
-                display: none;
-            }
+        @media (max-width:768px){
+            .container{ padding:1rem; margin: .5rem; }
+            article{ padding:.85rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Skip link for accessibility -->
-    <a href="#week-list-section" class="skip-link">Skip to main content</a>
 
+    <!-- TODO: Create a 'header' with a main heading ('h1') "Weekly Course Breakdown". -->
     <header>
         <h1>Weekly Course Breakdown</h1>
-        <p>View the schedule and topics for each week of the course</p>
     </header>
 
+    <!-- TODO: Create the 'main' content area. -->
     <main class="container">
-        <section id="week-list-section" aria-label="List of weekly course topics" class="weeks-list">
-            <!-- Week 1 -->
+    <!-- TODO: Create a 'section' to contain the list of weeks. -->
+    <section id="week-list-section" aria-label="Weeks list" class="weeks-list">
+
+            <!-- Week 1 Example -->
+            <!-- TODO: Use an 'article' element for each week to group its content semantically. -->
             <article>
-                <h2><span class="week-number" aria-label="Week 1">1</span> Introduction to HTML</h2>
-                <p class="start-date"><strong>Starts on:</strong> 2025-02-01</p>
-                <p class="description">This week introduces students to the basics of HTML structure and tags, including semantic elements, forms, and accessibility considerations.</p>
-                <a href="week-detail.html?week=1" class="detail-link" aria-label="View details for Week 1: Introduction to HTML">
-                    View Details & Discussion
-                </a>
+                <!-- TODO: Add a heading ('h2') for the week's title (e.g., "Week 1: Introduction to HTML"). -->
+                <h2>Week 1: Introduction to HTML</h2>
+
+                <!-- TODO: Add a paragraph ('p') to display the start date, e.g., "Starts on: YYYY-MM-DD". -->
+                <p>Starts on: 2025-02-01</p>
+
+                <!-- TODO: Add a paragraph ('p') for a brief description of the week. -->
+                <p>This week introduces students to the basics of HTML structure and tags.</p>
+
+                <!-- TODO: Add an anchor tag ('a') that links to the detail page. -->
+                <a href="week-detail.html">View Details & Discussion</a>
             </article>
 
-            <!-- Week 2 -->
+            <!-- Week 2 Example -->
             <article>
-                <h2><span class="week-number" aria-label="Week 2">2</span> CSS Fundamentals</h2>
-                <p class="start-date"><strong>Starts on:</strong> 2025-02-08</p>
-                <p class="description">Students will learn core CSS concepts such as selectors, colors, layout with Flexbox and Grid, and responsive design principles.</p>
-                <a href="week-detail.html?week=2" class="detail-link" aria-label="View details for Week 2: CSS Fundamentals">
-                    View Details & Discussion
-                </a>
+                <h2>Week 2: CSS Fundamentals</h2>
+                <p>Starts on: 2025-02-08</p>
+                <p>Students will learn core CSS concepts such as selectors, colors, and layout.</p>
+                <a href="week-detail.html">View Details & Discussion</a>
             </article>
 
-            <!-- Week 3 -->
+            <!-- Week 3 Example -->
             <article>
-                <h2><span class="week-number" aria-label="Week 3">3</span> JavaScript Basics</h2>
-                <p class="start-date"><strong>Starts on:</strong> 2025-02-15</p>
-                <p class="description">Introduction to scripting with variables, functions, control structures, and simple DOM manipulation. Includes basic event handling.</p>
-                <a href="week-detail.html?week=3" class="detail-link" aria-label="View details for Week 3: JavaScript Basics">
-                    View Details & Discussion
-                </a>
+                <h2>Week 3: JavaScript Basics</h2>
+                <p>Starts on: 2025-02-15</p>
+                <p>Introduction to scripting with variables, functions, and simple DOM manipulation.</p>
+                <a href="week-detail.html">View Details & Discussion</a>
             </article>
-            
-            <!-- Week 4 (Added for demonstration) -->
-            <article>
-                <h2><span class="week-number" aria-label="Week 4">4</span> Responsive Web Design</h2>
-                <p class="start-date"><strong>Starts on:</strong> 2025-02-22</p>
-                <p class="description">Advanced responsive techniques, mobile-first design, CSS media queries, and performance optimization for different devices.</p>
-                <a href="week-detail.html?week=4" class="detail-link" aria-label="View details for Week 4: Responsive Web Design">
-                    View Details & Discussion
-                </a>
-            </article>
+
         </section>
+        <!-- End of weekly list section. -->
     </main>
+    <!-- End of main. -->
 
-    <script>
-        // Enhanced JavaScript for better functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add keyboard navigation support
-            const detailLinks = document.querySelectorAll('.detail-link');
-            detailLinks.forEach(link => {
-                link.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.click();
-                    }
-                });
-            });
-            
-            // Print-friendly date formatting
-            const dates = document.querySelectorAll('.start-date');
-            dates.forEach(dateEl => {
-                const dateText = dateEl.textContent;
-                const match = dateText.match(/(\d{4})-(\d{2})-(\d{2})/);
-                if (match) {
-                    const date = new Date(match[1], match[2] - 1, match[3]);
-                    const formattedDate = date.toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                    dateEl.innerHTML = `<strong>Starts on:</strong> ${formattedDate}`;
-                }
-            });
-        });
-    </script>
+    <!-- page script: populates the week list -->
+    <script src="list.js" defer></script>
+
 </body>
 </html>

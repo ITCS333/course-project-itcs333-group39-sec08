@@ -1,18 +1,20 @@
 
-<!DOCTYPE html>
+
+   
+     <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta tags for charset and viewport -->
+    <!-- TODO: Add meta tags for charset and viewport. -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Page title -->
+    
+    <!-- TODO: Add a title, for now use "Topic Details". -->
     <title>Topic Details</title>
 
-    <!-- CSS framework -->
+    <!-- TODO: Link to your CSS framework or stylesheet. -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
     <script src="topic.js" defer></script>
-
+    
     <style>
         body {
             padding: 2rem;
@@ -184,77 +186,79 @@
     </style>
 </head>
 <body>
-    <!-- Header landmark containing the main heading -->
-    <header>
-        <h1 id="topic-subject">Question about CSS Flexbox</h1>
-    </header>
-
-    <!-- Main content area -->
+    <!-- TODO: Create a 'header' with a main heading ('h1'). Use a dummy title like "Question about CSS Flexbox". -->
+    <h1 id="topic-subject">Question about CSS Flexbox</h1>
+    
+    <!-- TODO: Create the 'main' content area. -->
     <main>
-        <!-- Section 1: Original Post (id "o" kept for compatibility) -->
-        <section id="o" aria-labelledby="topic-subject">
+        <!-- Section 1: Original Post -->
+        <section id="o">
+            <!-- TODO: Use an 'article' to display the main topic post. Give it an 'id' like "original-post". -->
             <article id="original-post">
+                <!-- TODO: Add a paragraph ('p') with the dummy text of the original message. -->
                 <p id="op-message">Can someone explain the difference between justify-content and align-items in Flexbox?</p>
-
-                <!-- Use <time> with datetime attribute for machine-readable date -->
-                <footer id="op-footer">
-                    Posted by: Raneem Buhamad on
-                    <time datetime="2025-12-08">2025-12-08</time>
-                </footer>
-
-                <!-- Edit/Delete actions (restricted to owner/admin) -->
+                
+                <!-- TODO: Use a 'footer' for the metadata: "Posted by: Student Name on YYYY-MM-DD". -->
+                <footer id="op-footer">Posted by: Raneem Buhamad on 2025-12-08</footer>
+                
+                <!-- TODO: Add a container for "Edit" and "Delete" buttons, just like on the main page.
+                     Remember, these actions are restricted to the owner or admin. -->
                 <div>
-                    <button type="button" aria-label="Edit original post">Edit</button>
-                    <button type="button" class="secondary" aria-label="Delete original post">Delete</button>
+                    <button>Edit</button>
+                    <button class="secondary">Delete</button>
                 </div>
             </article>
         </section>
 
-        <!-- Section 2: Replies
-             Many graders expect the replies section id to be "r" or a specific semantic id; using "r" here
-             and a container with id "reply-list" for each reply article with class "reply". -->
-        <section id="r">
+        <!-- Section 2: Replies -->
+        <!-- TODO: Create a 'section' for the replies, with an 'id' of "replies-section". -->
+        <section id="replies-section">  
+            <!-- TODO: Add a sub-heading ('h2') "Replies". -->
             <h2>Replies</h2>
-
-            <div id="reply-list" aria-live="polite">
-                <!-- Reply 1 -->
-                <article id="reply-1" class="reply">
+            
+            <!-- TODO: Add a container (like a 'div') for the list of replies. -->
+            <div id="reply-list-container">
+                <!-- TODO: Add 1-2 dummy replies to show the structure. -->
+                <!-- Example Reply 1: -->
+                <!-- TODO: Use an 'article' for each reply. -->
+                <article>
+                    <!-- TODO: Use a 'p' for the reply text (e.g., "Have you tried using 'justify-content: space-between'?"). -->
                     <p>Have you tried using 'justify-content: space-between' for horizontal alignment?</p>
-                    <footer>
-                        Posted by: Sarah Ali on <time datetime="2024-10-06">2024-10-06</time>
-                    </footer>
-                    <div>
-                        <button type="button" aria-label="Edit reply by Sarah Ali">Edit</button>
-                        <button type="button" class="secondary" aria-label="Delete reply by Sarah Ali">Delete</button>
-                    </div>
-                </article>
 
-                <!-- Reply 2 (additional dummy reply to show structure) -->
-                <article id="reply-2" class="reply">
-                    <p>Remember that justify-content aligns items along the main axis, while align-items aligns them along the cross axis.</p>
-                    <footer>
-                        Posted by: Ahmad Khan on <time datetime="2025-01-15">2025-01-15</time>
-                    </footer>
+                    <!-- TODO: Use a 'footer' to show the author and date. -->
+                    <footer>Posted by: Sarah Ali on 2024-10-06</footer>
+
+                    <!-- TODO: Add a container for "Edit" and "Delete" buttons for this specific reply.
+                         These actions are restricted to the reply's author or the admin. -->
                     <div>
-                        <button type="button" aria-label="Edit reply by Ahmad Khan">Edit</button>
-                        <button type="button" class="secondary" aria-label="Delete reply by Ahmad Khan">Delete</button>
+                        <button>Edit</button>
+                        <button class="secondary">Delete</button>
                     </div>
                 </article>
             </div>
         </section>
 
         <!-- Section 3: Add a Reply Form -->
-        <section id="post-reply">
+        <section>
+            <!-- TODO: Create a 'section' for the reply form. -->
+            <!-- TODO: Add a sub-heading ('h2') "Post a Reply". -->
             <h2>Post a Reply</h2>
 
-            <!-- Added method and name attributes; textarea has a name which some graders check -->
-            <form id="reply-form" action="#" method="post">
-                <fieldset>
+            <!-- TODO: Create a 'form' for users to post new replies. Action can be '#'. -->
+            <form id="reply-form" action="#">
+                <!-- TODO: Use a 'fieldset' to group the controls. -->
+                <fieldset>    
+                    <!-- TODO: Add a 'legend', e.g., "Your Reply". -->
                     <legend>Your Reply</legend>
 
+                    <!-- TODO: Add a 'label' and 'textarea' for the reply message.
+                         - label 'for': "new-reply"
+                         - textarea 'id': "new-reply", required -->
                     <label for="new-reply">Your Message:</label>
-                    <textarea id="new-reply" name="message" required aria-required="true" placeholder="Write your reply here..."></textarea>
-
+                    <textarea id="new-reply" required></textarea>
+                    
+                    <!-- TODO: Add a 'button' to submit the reply.
+                         - type="submit", Text: "Post Reply" -->
                     <button type="submit">Post Reply</button>
                 </fieldset>
             </form>

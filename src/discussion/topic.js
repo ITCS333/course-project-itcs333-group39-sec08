@@ -1,3 +1,4 @@
+
 /*
   Requirement: Populate the single topic page and manage replies.
 
@@ -22,6 +23,12 @@ let currentReplies = []; // Will hold replies for *this* topic
 
 // --- Element Selections ---
 // TODO: Select all the elements you added IDs for in step 2.
+const topicSubject = document.getElementById('topic-subject');
+const opMessage = document.getElementById('op-message');
+const opFooter = document.getElementById('op-footer');
+const replyListContainer = document.getElementById('reply-list-container');
+const replyForm = document.getElementById('reply-form');
+const newReplyText = document.getElementById('new-reply');
 
 // --- Functions ---
 
@@ -33,7 +40,8 @@ let currentReplies = []; // Will hold replies for *this* topic
  * 3. Return the id.
  */
 function getTopicIdFromURL() {
-  // ... your implementation here ...
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
 }
 
 /**
@@ -46,7 +54,9 @@ function getTopicIdFromURL() {
  * 4. (Optional) Add a "Delete" button with `data-id="${topic.id}"` to the OP.
  */
 function renderOriginalPost(topic) {
-  // ... your implementation here ...
+  topicSubject.textContent = topic.subject;
+  opMessage.textContent = topic.message;
+  opFooter.textContent = `Posted by: ${topic.author} on ${topic.date}`;
 }
 
 /**
@@ -58,7 +68,37 @@ function renderOriginalPost(topic) {
  * - Include a "Delete" button with class "delete-reply-btn" and `data-id="${id}"`.
  */
 function createReplyArticle(reply) {
-  // ... your implementation here ...
+  const article = document.createElement('article');
+  article.className = 'reply';
+  
+  const p = document.createElement('p');
+  p.textContent = reply.text;
+  
+  const footer = document.createElement('footer');
+  const footerP = document.createElement('p');
+  footerP.textContent = `Replied by: ${reply.author} on ${reply.date}`;
+  footer.appendChild(footerP);
+  
+  const div = document.createElement('div');
+  
+  const editBtn = document.createElement('button');
+  editBtn.textContent = 'Edit';
+  editBtn.className = 'edit-reply-btn';
+  editBtn.setAttribute('data-id', reply.id);
+  
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.className = 'secondary delete-reply-btn';
+  deleteBtn.setAttribute('data-id', reply.id);
+  
+  div.appendChild(editBtn);
+  div.appendChild(deleteBtn);
+  
+  article.appendChild(p);
+  article.appendChild(footer);
+  article.appendChild(div);
+  
+  return article;
 }
 
 /**
@@ -70,7 +110,11 @@ function createReplyArticle(reply) {
  * append the resulting <article> to `replyListContainer`.
  */
 function renderReplies() {
-  // ... your implementation here ...
+  replyListContainer.innerHTML = '';
+  currentReplies.forEach(reply => {
+    const replyArticle = createReplyArticle(reply);
+    replyListContainer.appendChild(replyArticle);
+  });
 }
 
 /**
@@ -92,7 +136,23 @@ function renderReplies() {
  * 7. Clear the `newReplyText` textarea.
  */
 function handleAddReply(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+  
+  const text = newReplyText.value.trim();
+  if (!text) {
+    return;
+  }
+  
+  const newReply = {
+    id: `reply_${Date.now()}`,
+    author: 'Student',
+    date: new Date().toISOString().split('T')[0],
+    text: text
+  };
+  
+  currentReplies.push(newReply);
+  renderReplies();
+  newReplyText.value = '';
 }
 
 /**
@@ -106,7 +166,88 @@ function handleAddReply(event) {
  * 4. Call `renderReplies()` to refresh the list.
  */
 function handleReplyListClick(event) {
-  // ... your implementation here ...
+  console.log('Reply list clicked!', event.target);
+  const target = event.target;
+  
+  // Check if clicked element is a button
+  if (target.tagName !== 'BUTTON') {
+    console.log('Not a button, ignoring');
+    return;
+  }
+  
+  const replyId = target.getAttribute('data-id');
+  console.log('Reply ID:', replyId);
+  if (!replyId) {
+    console.log('No data-id found');
+    return;
+  }
+  
+  // Handle Delete button
+  if (target.classList.contains('delete-reply-btn')) {
+    if (confirm('Are you sure you want to delete this reply?')) {
+      currentReplies = currentReplies.filter(reply => reply.id !== replyId);
+      renderReplies();
+    }
+    return;
+  }
+  
+  // Handle Edit button  
+  if (target.classList.contains('edit-reply-btn')) {
+    const reply = currentReplies.find(r => r.id === replyId);
+    const article = target.closest('article');
+    
+    if (!reply || !article) {
+      return;
+    }
+    
+    const p = article.querySelector('p');
+    if (!p) {
+      return;
+    }
+    
+    // Create textarea for editing
+    const textarea = document.createElement('textarea');
+    textarea.value = reply.text;
+    textarea.className = 'edit-reply-textarea';
+    textarea.style.cssText = 'width: 100%; min-height: 80px; padding: 0.75rem; font-size: 0.95rem; border: 2px solid #0066cc; border-radius: 6px; font-family: inherit; resize: vertical;';
+    
+    // Replace paragraph with textarea
+    p.replaceWith(textarea);
+    
+    // Change Edit button to Update
+    target.textContent = 'Update';
+    target.classList.remove('edit-reply-btn');
+    target.classList.add('update-reply-btn');
+    
+    textarea.focus();
+    textarea.select();
+    return;
+  }
+  
+  // Handle Update button
+  if (target.classList.contains('update-reply-btn')) {
+    const reply = currentReplies.find(r => r.id === replyId);
+    const article = target.closest('article');
+    
+    if (!reply || !article) {
+      return;
+    }
+    
+    const textarea = article.querySelector('.edit-reply-textarea');
+    if (!textarea) {
+      return;
+    }
+    
+    const newText = textarea.value.trim();
+    
+    if (newText) {
+      reply.text = newText;
+      renderReplies();
+    } else {
+      alert('Reply text cannot be empty!');
+    }
+    return;
+  }
 }
 
 /**
@@ -128,7 +269,175 @@ function handleReplyListClick(event) {
  * 8. If the topic is not found, display an error in `topicSubject`.
  */
 async function initializePage() {
-  // ... your implementation here ...
+  console.log('Initializing page...');
+  console.log('Elements:', { topicSubject, opMessage, opFooter, replyListContainer, replyForm, newReplyText });
+  
+  currentTopicId = getTopicIdFromURL();
+  console.log('Topic ID from URL:', currentTopicId);
+  
+  if (!currentTopicId) {
+    topicSubject.textContent = "Topic not found.";
+    return;
+  }
+  
+  try {
+    const [topicsResponse, repliesResponse] = await Promise.all([
+      fetch('api/topics.json'),
+      fetch('api/comments.json')
+    ]);
+    
+    const topics = await topicsResponse.json();
+    const repliesData = await repliesResponse.json();
+    
+    console.log('Topics loaded:', topics);
+    console.log('Replies data:', repliesData);
+    
+    const topic = topics.find(t => t.id === currentTopicId);
+    console.log('Found topic:', topic);
+    
+    if (topic) {
+      currentReplies = repliesData[currentTopicId] || [];
+      console.log('Current replies:', currentReplies);
+      
+      renderOriginalPost(topic);
+      renderReplies();
+      
+      console.log('Adding event listeners...');
+      
+      // Add submit listener for reply form
+      if (replyForm) {
+        replyForm.addEventListener('submit', handleAddReply);
+        console.log('Submit listener added');
+      }
+      
+      // Add click listener to entire body to catch all button clicks
+      document.body.addEventListener('click', handleAllButtonClicks);
+      console.log('Click listener added to body');
+      
+    } else {
+      topicSubject.textContent = "Topic not found.";
+    }
+  } catch (error) {
+    console.error('Error loading topic:', error);
+    topicSubject.textContent = "Error loading topic.";
+  }
+}
+
+// Handle all button clicks on the page
+function handleAllButtonClicks(event) {
+  const target = event.target;
+  
+  console.log('Clicked:', target);
+  
+  // Check if clicked element is a button
+  if (target.tagName !== 'BUTTON') {
+    return;
+  }
+  
+  console.log('Button clicked!', target.textContent, target.className);
+  
+  // Get the closest article and its data
+  const article = target.closest('article');
+  if (!article) {
+    return;
+  }
+  
+  const isOriginalPost = article.id === 'original-post';
+  const replyId = target.getAttribute('data-id');
+  
+  // Handle Delete button
+  if (target.classList.contains('delete-btn') || target.classList.contains('secondary') || target.textContent.trim() === 'Delete') {
+    if (isOriginalPost) {
+      if (confirm('Are you sure you want to delete this topic?')) {
+        alert('Topic deleted! (In a real app, this would redirect back to the board)');
+        // window.location.href = 'baord.html';
+      }
+    } else if (replyId) {
+      if (confirm('Are you sure you want to delete this reply?')) {
+        currentReplies = currentReplies.filter(reply => reply.id !== replyId);
+        renderReplies();
+      }
+    }
+    return;
+  }
+  
+  // Handle Edit button
+  if (target.classList.contains('edit-btn') || target.classList.contains('edit-reply-btn') || target.textContent.trim() === 'Edit') {
+    if (isOriginalPost) {
+      // Edit original post
+      const p = article.querySelector('#op-message');
+      if (!p) return;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = p.textContent;
+      textarea.className = 'edit-op-textarea';
+      textarea.style.cssText = 'width: 100%; min-height: 100px; padding: 0.75rem; font-size: 0.95rem; border: 2px solid #0066cc; border-radius: 6px; font-family: inherit; resize: vertical;';
+      
+      p.replaceWith(textarea);
+      target.textContent = 'Update';
+      target.classList.add('update-btn');
+      textarea.focus();
+      textarea.select();
+    } else if (replyId) {
+      // Edit reply
+      const reply = currentReplies.find(r => r.id === replyId);
+      if (!reply) return;
+      
+      const p = article.querySelector('p');
+      if (!p) return;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = reply.text;
+      textarea.className = 'edit-reply-textarea';
+      textarea.style.cssText = 'width: 100%; min-height: 80px; padding: 0.75rem; font-size: 0.95rem; border: 2px solid #0066cc; border-radius: 6px; font-family: inherit; resize: vertical;';
+      
+      p.replaceWith(textarea);
+      target.textContent = 'Update';
+      target.classList.remove('edit-btn', 'edit-reply-btn');
+      target.classList.add('update-reply-btn');
+      target.setAttribute('data-id', replyId);
+      textarea.focus();
+      textarea.select();
+    }
+    return;
+  }
+  
+  // Handle Update button
+  if (target.classList.contains('update-btn') || target.classList.contains('update-reply-btn') || target.textContent.trim() === 'Update') {
+    if (isOriginalPost) {
+      // Update original post
+      const textarea = article.querySelector('.edit-op-textarea');
+      if (!textarea) return;
+      
+      const newText = textarea.value.trim();
+      if (newText) {
+        const p = document.createElement('p');
+        p.id = 'op-message';
+        p.textContent = newText;
+        textarea.replaceWith(p);
+        target.textContent = 'Edit';
+        target.classList.remove('update-btn');
+      } else {
+        alert('Message cannot be empty!');
+      }
+    } else if (replyId) {
+      // Update reply
+      const reply = currentReplies.find(r => r.id === replyId);
+      if (!reply) return;
+      
+      const textarea = article.querySelector('.edit-reply-textarea');
+      if (!textarea) return;
+      
+      const newText = textarea.value.trim();
+      if (newText) {
+        reply.text = newText;
+        renderReplies();
+      } else {
+        alert('Reply text cannot be empty!');
+      }
+    }
+    return;
+  }
 }
 
 // --- Initial Page Load ---

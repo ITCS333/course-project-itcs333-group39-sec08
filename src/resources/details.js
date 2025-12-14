@@ -12,6 +12,7 @@
      - To the <div> for comments: `id="comment-list"`
      - To the "Leave a Comment" <form>: `id="comment-form"`
      - To the <textarea>: `id="new-comment"`
+    
 
   3. Implement the TODOs below.
 */
@@ -45,12 +46,7 @@ function getResourceIdFromURL() {
  // 1. Get the query string
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    let id = urlParams.get('id');
-    
-    // إذا كان ID رقم، حوله إلى "res_X"
-    if (id && /^\d+$/.test(id)) {
-        id = `res_${id}`;
-    }
+    const id = urlParams.get('id');
     // 3. Return the id
     return id;}
 
@@ -209,8 +205,9 @@ async function initializePage() {
         
         // 3. Fetch both JSON files using Promise.all
         const [resourcesResponse, commentsResponse] = await Promise.all([
-            fetch(SCR/API/resources.json),
-            fetch(SCR/API/comments.json)
+             fetch('API/resources.json'),
+             fetch('API/comments.json'),
+
         ]);
         
         // Check if responses are successful
@@ -222,12 +219,8 @@ async function initializePage() {
         const resources = await resourcesResponse.json();
         const allComments = await commentsResponse.json();
         
-        // 5. Find the correct resource
-        const resource = resources.find(r => r.id === currentResourceId);
-        
-        // 6. Get the correct comments array
-        // Assuming resource-comments.json has structure: { "resourceId": [comments] }
-        currentComments = allComments[currentResourceId] || [];
+        const resource = resources.find(r => String(r.id) === String(currentResourceId));
+         currentComments = allComments[String(currentResourceId)] || [];
         
         // 7. If resource is found
         if (resource) {

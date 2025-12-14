@@ -12,9 +12,11 @@
 */
 
 let assignments = [];
+let editingId = null;
 
 const assignmentForm = document.querySelector("#assignment-form");
 const assignmentsTableBody = document.querySelector("#assignments-tbody");
+const submitBtn = assignmentForm.querySelector('button[type="submit"]');
 
 /**
  * TODO: Implement the createAssignmentRow function.
@@ -97,33 +99,65 @@ async function handleAddAssignment(event) {
   const filesRaw = document.querySelector("#assignment-files").value;
   const files = filesRaw ? filesRaw.split("\n") : [];
 
-  const payload = {
-    title: title,
-    description: description,
-    due_date: dueDate,
-    files: files,
-  };
-
   try {
+    if (editingId) {
+      const payload = {
+        id: Number(editingId),         
+        title,
+        description,
+        due_date: dueDate,
+        files
+      };
+
+      const response = await fetch("api/index.php?resource=assignments", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        alert(result.error || "Failed to update assignment");
+        return;
+      }
+
+      const listResponse = await fetch("api/index.php?resource=assignments");
+      assignments = await listResponse.json();
+
+      renderTable();
+      assignmentForm.reset();
+      editingId = null;
+
+      if (submitBtn) submitBtn.textContent = "Add Assignment";
+       assignmentsTableBody.scrollIntoView({ behavior: "smooth" });
+
+      return;
+    }
+
+    const payload = {
+      title,
+      description,
+      due_date: dueDate,
+      files,
+    };
+
     const response = await fetch("api/index.php?resource=assignments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to create assignment");
-    }
+    if (!response.ok) throw new Error("Failed to create assignment");
 
     const listResponse = await fetch("api/index.php?resource=assignments");
     assignments = await listResponse.json();
 
     renderTable();
-
     assignmentForm.reset();
   } catch (err) {
     console.error(err);
-    alert("Could not create assignment.");
+    alert("Could not save assignment.");
   }
 }
 
@@ -139,7 +173,28 @@ async function handleAddAssignment(event) {
  */
 async function handleTableClick(event) {
   const target = event.target;
-  
+
+  if (target.classList.contains("edit-btn")) {
+    assignmentForm.scrollIntoView({ behavior: "smooth" });
+    const id = target.getAttribute("data-id");
+    if (!id) return;
+
+    editingId = id;
+
+    const a = assignments.find(x => String(x.id) === String(id));
+    if (!a) return;
+
+    document.querySelector("#assignment-title").value = a.title ?? "";
+    document.querySelector("#assignment-description").value = a.description ?? "";
+    document.querySelector("#assignment-due-date").value = a.due_date ?? "";
+    document.querySelector("#assignment-files").value =
+      Array.isArray(a.files) ? a.files.join("\n") : "";
+    
+    if (submitBtn) submitBtn.textContent = "Update Assignment";
+
+    return;
+  }
+
   if (!target.classList.contains("delete-btn")) return;
 
   const id = target.getAttribute("data-id");
@@ -149,16 +204,12 @@ async function handleTableClick(event) {
   if (!confirmDelete) return;
 
   try {
-
     const response = await fetch(
       `api/index.php?resource=assignments&id=${encodeURIComponent(id)}`,
-      {
-        method: "DELETE",
-      }
+      { method: "DELETE" }
     );
 
     const result = await response.json();
-    console.log("deleteAssignment response:", result);
 
     if (result.error) {
       alert(result.error);
@@ -169,9 +220,8 @@ async function handleTableClick(event) {
       alert("Could not delete assignment.");
       return;
     }
-    assignments = assignments.filter(
-      (assignment) => String(assignment.id) !== String(id)
-    );
+
+    assignments = assignments.filter(a => String(a.id) !== String(id));
     renderTable();
   } catch (err) {
     console.error("Delete failed:", err);

@@ -37,7 +37,7 @@ function getAssignmentIdFromURL() {
  */
 function renderAssignmentDetails(assignment) {
   assignmentTitle.textContent = assignment.title;
-  assignmentDueDate.textContent = "Due: " + assignment.dueDate;
+  assignmentDueDate.textContent = "Due: " + assignment.due_date;
   assignmentDescription.textContent = assignment.description;
   assignmentFilesList.innerHTML = "";
 

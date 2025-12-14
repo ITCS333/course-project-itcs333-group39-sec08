@@ -34,7 +34,13 @@
  * 
  * Response Format: JSON
  */
-
+session_start();
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = [
+        'role' => 'user',
+        'created_at' => date('c')
+    ];
+}
 // ============================================================================
 // HEADERS AND CORS CONFIGURATION
 // ============================================================================

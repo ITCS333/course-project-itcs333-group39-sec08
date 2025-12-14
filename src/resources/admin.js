@@ -162,7 +162,6 @@ function handleTableClick(event) {
         // 2. Get the data-id attribute from the button
         const resourceId = event.target.getAttribute('data-id');
         
-        // طلب تأكيد قبل الحذف (اختياري لكن مستحسن)
         if (confirm('Are you sure you want to delete this resource?')) {
             // 3. Update the global resources array by filtering out the resource
             resources = resources.filter(resource => resource.id !== resourceId);
@@ -187,7 +186,7 @@ function handleTableClick(event) {
 async function loadAndInitialize() {
    try {
         // 1. Use fetch() to get data from 'resources.json'
-        const response = await fetch('resources.json');
+        const response = await fetch('API/resources.json');
         
         // Check if the response is successful
         if (!response.ok) {

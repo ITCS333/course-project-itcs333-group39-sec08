@@ -62,7 +62,7 @@ async function loadResources(){
  try {
         
         // 1. Fetch data from resources.json
-        const response = await fetch('resources.json');
+        const response = await fetch('API/resources.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

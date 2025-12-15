@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 $_SESSION['user_data'] = $_SESSION['user_data'] ?? [];
@@ -28,10 +29,6 @@ try {
 // ---------------- HELPERS ----------------
 function clean($v) {
     return htmlspecialchars(strip_tags(trim((string)$v)), ENT_QUOTES, 'UTF-8');
-}
-
-function validateEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
 // ---------------- REQUEST ----------------

@@ -30,6 +30,10 @@ function clean($v) {
     return htmlspecialchars(strip_tags(trim((string)$v)), ENT_QUOTES, 'UTF-8');
 }
 
+function validateEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
 // ---------------- REQUEST ----------------
 $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents('php://input'), true);
@@ -156,3 +160,4 @@ try {
     http_response_code(500);
     echo json_encode(['error' => 'Database error']);
 }
+

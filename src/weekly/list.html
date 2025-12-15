@@ -1,163 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Course Breakdown</title>
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    
-    <style>
-        :root {
-            --primary: #0052cc;
-            --primary-600: #0a3a99;
-            --surface: #ffffff;
-            --muted: #6c757d;
-            --border: #e9ecef;
-        }
-
-        body {
-            padding: 2rem;
-            margin: 0;
-            background: #f8fafc;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            color: #000000;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 8px 30px rgba(3, 38, 76, 0.05);
-        }
-
-        h1 {
-            margin-bottom: 2rem;
-            font-size: 2rem;
-            text-align: center;
-            color: #000000;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        section {
-            margin-bottom: 2rem;
-        }
-
-        article {
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: #ffffff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-            margin-bottom: 1.5rem;
-            transition: box-shadow 0.2s ease;
-        }
-
-        article:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        article h2 {
-            margin-top: 0;
-            margin-bottom: 0.75rem;
-            font-size: 1.3rem;
-            color: #0052cc;
-            font-weight: 600;
-        }
-
-        article p {
-            margin-bottom: 1rem;
-            line-height: 1.6;
-        }
-
-        .detail-link {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            border-radius: 8px;
-            font-weight: 600;
-            background-color: #0066cc;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-decoration: none;
-            margin-top: 0.75rem;
-        }
-
-        .detail-link:hover {
-            background-color: #0055aa;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            transform: translateY(-1px);
-            text-decoration: none;
-            color: white;
-        }
-
-        .detail-link:active {
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .container {
-                padding: 1.25rem;
-            }
-            
-            article {
-                padding: 1.25rem;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly Breakdown</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+<script src="list.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Weekly Course Breakdown</h1>
-        </header>
 
-        <main>
-            <section id="week-list-section" aria-label="Weeks list">
-                <article>
-                    <h2>Week 1: Introduction to HTML</h2>
-                    <p><strong>Starts on:</strong> 2025-02-01</p>
-                    <p>This week introduces the basic structure of HTML pages, covering essential tags and how browsers interpret them.</p>
-                    <a href="details.html?week=1" class="detail-link">View Details & Discussion</a>
-                </article>
+<main class="container">
+  <h1>Weekly Course Breakdown</h1>
+  <section id="week-list-section"></section>
+</main>
 
-                <article>
-                    <h2>Week 2: CSS Fundamentals</h2>
-                    <p><strong>Starts on:</strong> 2025-02-08</p>
-                    <p>Students will learn core CSS concepts such as selectors, colors, and layout with Flexbox and Grid.</p>
-                    <a href="details.html?week=2" class="detail-link">View Details & Discussion</a>
-                </article>
-
-                <article>
-                    <h2>Week 3: JavaScript Basics</h2>
-                    <p><strong>Starts on:</strong> 2025-02-15</p>
-                    <p>Introduction to scripting with variables, functions, control structures, and simple DOM manipulation.</p>
-                    <a href="details.html?week=3" class="detail-link">View Details & Discussion</a>
-                </article>
-            </section>
-        </main>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Weekly breakdown page loaded successfully');
-        });
-    </script>
 </body>
 </html>

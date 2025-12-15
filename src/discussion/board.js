@@ -1,11 +1,12 @@
-// ================= GLOBAL STATE =================
+
+   // ================= GLOBAL STATE =================
 let topics = [];
 
 // ================= ELEMENTS =================
 const topicListContainer = document.getElementById('topic-list-container');
 const newTopicForm = document.getElementById('new-topic-form');
-const newSubject = document.getElementById('new-subject');
-const newMessage = document.getElementById('new-message');
+const newSubject = document.getElementById('topic-subject');
+const newMessage = document.getElementById('topic-message');
 
 // ================= RENDER =================
 function createTopicArticle(topic) {
@@ -152,7 +153,7 @@ async function handleTopicListClick(e) {
 }
 
 // ================= INIT =================
-async function init() {
+async function loadAndInitialize() {
   const res = await fetch('/src/discussion/api/topics.php');
   topics = await res.json();
 
@@ -162,5 +163,4 @@ async function init() {
   topicListContainer.addEventListener('click', handleTopicListClick);
 }
 
-init();
-
+loadAndInitialize();

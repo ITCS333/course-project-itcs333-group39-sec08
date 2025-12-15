@@ -71,7 +71,7 @@ async function handleCreateTopic(e) {
   }
 
   if (!res || typeof res.json !== 'function') {
-    alert('Cannot reach server. Topic not created.');
+    console.warn('Cannot reach server. Topic not created.');
     return;
   }
 

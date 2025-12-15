@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+// Initialize session data
+$_SESSION['user_data'] = $_SESSION['user_data'] ?? [];
+
 // ================== DEBUG (REMOVE IN PRODUCTION) ==================
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -23,11 +26,6 @@ require_once __DIR__ . '/../../../../includes/db.php';
 try {
     $database = new Database();
     $db = $database->getConnection();
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
-    exit;
-}
 
 // ================== HELPERS ==================
 function respond($data, $code = 200) {
@@ -45,11 +43,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 $id = $_GET['id'] ?? null;
 $resource = $_GET['resource'] ?? 'weeks';
-
-// Initialize session data
-if (!isset($_SESSION['user_data'])) {
-    $_SESSION['user_data'] = [];
-}
 
 // =================================================
 // ================== WEEKS ========================
@@ -206,3 +199,10 @@ if ($resource === 'comments') {
 
 // ================== FALLBACK ==================
 respond(['success' => false, 'error' => 'Invalid resource'], 400);
+
+} catch (PDOException $e) {
+    error_log($e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Database error']);
+    exit;
+}

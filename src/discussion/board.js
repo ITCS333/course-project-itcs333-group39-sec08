@@ -1,5 +1,4 @@
-
-   // ================= GLOBAL STATE =================
+// ================= GLOBAL STATE =================
 let topics = [];
 
 // ================= ELEMENTS =================
@@ -56,15 +55,25 @@ async function handleCreateTopic(e) {
   const message = newMessage.value.trim();
   if (!subject || !message) return;
 
-  const res = await fetch('/src/discussion/api/topics.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      subject,
-      message,
-      author: 'Student'
-    })
-  });
+  let res;
+  try {
+    res = await fetch('/src/discussion/api/topics.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject,
+        message,
+        author: 'Student'
+      })
+    });
+  } catch (err) {
+    res = null;
+  }
+
+  if (!res || typeof res.json !== 'function') {
+    alert('Cannot reach server. Topic not created.');
+    return;
+  }
 
   const result = await res.json();
 
@@ -154,8 +163,18 @@ async function handleTopicListClick(e) {
 
 // ================= INIT =================
 async function loadAndInitialize() {
-  const res = await fetch('/src/discussion/api/topics.php');
-  topics = await res.json();
+  let res;
+  try {
+    res = await fetch('/src/discussion/api/topics.php');
+  } catch (e) {
+    res = null;
+  }
+
+  if (!res || typeof res.json !== 'function') {
+    topics = [];
+  } else {
+    topics = await res.json();
+  }
 
   renderTopics();
 

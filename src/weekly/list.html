@@ -1,272 +1,134 @@
-<!--
-  Requirement: Create the Dedicated Page for a Single Week
-
-  Instructions:
-  This page displays the full details for one week and allows for discussion.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<style>
-  /* Improved base page spacing */
-  body {
-    padding: 1.5rem;
-    margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f8fafc;
-    line-height: 1.5;
-  }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly Breakdown</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+<script src="list.js" defer></script>
 
-  /* Container for better content alignment */
-  .container {
-    max-width: 1000px;
-    margin: 0 auto;
-    background-color: white;
-    border-radius: 14px;
-    padding: 2rem;
-    box-shadow: 0 8px 30px rgba(3, 38, 76, 0.05);
-  }
 
-  /* Header styling */
-  h1 {
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
-    text-align: center;
-    color: #000000;
-    font-weight: 700;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e9ecef;
-  }
+  <style>
+      :root {
+          --primary: #0052cc;
+          --primary-600: #0a3a99;
+          --surface: #ffffff;
+          --muted: #6c757d;
+          --border: #e9ecef;
+      }
 
-  h2 {
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-    color: #1a365d;
-    font-weight: 600;
-  }
+      body {
+          padding: 2rem;
+          margin: 0;
+          background: #f8fafc;
+          font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          color: #000000;
+          font-size: 0.95rem;
+          line-height: 1.6;
+      }
 
-  section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background-color: white;
-    border-radius: 10px;
-    border: 1px solid #e9ecef;
-  }
+      .container {
+          max-width: 1000px;
+          margin: 0 auto;
+          background: var(--surface);
+          border-radius: 12px;
+          padding: 2rem;
+          box-shadow: 0 8px 30px rgba(3, 38, 76, 0.05);
+      }
 
-  article {
-    padding: 1.5rem;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    font-size: 0.95rem;
-    transition: box-shadow 0.2s ease;
-  }
+      h1 {
+          margin-bottom: 2rem;
+          font-size: 2rem;
+          text-align: center;
+          color: #000000;
+          font-weight: 700;
+          letter-spacing: -0.5px;
+      }
 
-  article:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
+      section {
+          margin-bottom: 2rem;
+      }
 
-  #discussion-forum article {
-    margin-bottom: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1.25rem;
-    transition: box-shadow 0.2s ease;
-  }
+      article {
+          padding: 1.5rem;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          background: #ffffff;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+          margin-bottom: 1.5rem;
+          transition: box-shadow 0.2s ease;
+      }
 
-  #discussion-forum article:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
+      article:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
 
-  #discussion-forum article p {
-    margin-bottom: 1rem;
-    color: #333;
-    font-style: normal;
-  }
+      article h2 {
+          margin-top: 0;
+          margin-bottom: 0.75rem;
+          font-size: 1.3rem;
+          color: #0052cc;
+          font-weight: 600;
+      }
 
-  #discussion-forum article footer {
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: #2563eb;
-    font-style: normal;
-    font-weight: 600;
-    border-top: 1px solid #e9ecef;
-    padding-top: 0.75rem;
-  }
+      article p {
+          margin-bottom: 1rem;
+          line-height: 1.6;
+      }
 
-  form {
-    margin-top: 2rem;
-  }
+      .detail-link {
+          display: inline-block;
+          padding: 0.4rem 0.8rem;
+          font-size: 0.85rem;
+          border-radius: 8px;
+          font-weight: 600;
+          background-color: #0066cc;
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          text-decoration: none;
+          margin-top: 0.75rem;
+      }
 
-  form fieldset {
-    padding: 1.5rem;
-    border-radius: 12px;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-  }
+      .detail-link:hover {
+          background-color: #0055aa;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          transform: translateY(-1px);
+          text-decoration: none;
+          color: white;
+      }
 
-  form legend {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1a365d;
-    padding: 0 0.5rem;
-  }
+      .detail-link:active {
+          transform: translateY(0);
+      }
 
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #333;
-  }
+      @media (max-width: 768px) {
+          body {
+              padding: 1rem;
+          }
 
-  textarea {
-    border-radius: 8px;
-    font-size: 0.95rem;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    font-family: inherit;
-    resize: vertical;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
+          .container {
+              padding: 1.25rem;
+          }
 
-  textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-  }
+          article {
+              padding: 1.25rem;
+          }
 
-  input {
-    border-radius: 8px;
-    font-size: 0.95rem;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid #ced4da;
-  }
-
-  input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-  }
-
-  #hi {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    display: inline-block;
-    width: auto;
-    margin-top: 0.75rem;
-    text-align: center;
-    font-weight: 600;
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  #hi:hover {
-    background-color: #1d4ed8;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-  }
-
-  #hi:active {
-    transform: translateY(0);
-  }
-
-  ul {
-    margin-left: 1.5rem;
-    font-size: 0.95rem;
-    line-height: 1.8;
-  }
-
-  ul li {
-    margin-bottom: 0.5rem;
-  }
-
-  ul a {
-    color: #2563eb;
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  ul a:hover {
-    color: #1d4ed8;
-    text-decoration: underline;
-  }
-
-  p {
-    margin-bottom: 1rem;
-    line-height: 1.6;
-  }
-
-  /* Responsive design */
-  @media (max-width: 768px) {
-    body {
-      padding: 0.5rem;
-    }
-
-    .container {
-      padding: 1rem;
-    }
-
-    section {
-      padding: 1rem;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-    }
-  }
-</style>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Week Details</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
-    <script src="details.js" defer></script>
+          h1 {
+              font-size: 1.8rem;
+          }
+      }
+  </style>
 </head>
 <body>
-    <div class="container">
 
-      <header> <h1 id="week-title"></h1> </header>
+<main class="container">
+  <h1>Weekly Course Breakdown</h1>
+  <section id="week-list-section"></section>
+</main>
 
-        <main>
-            <!-- Section 1: Weekly Information -->
-            <section id="ok">
-                <article>
-                    <p id="week-start-date"></p>
-                    <h2>Description & Notes</h2>
-                    <p id="week-description"></p>
-
-                    <h2>Exercises & Resources</h2>
-                    <ul id="week-links-list"></ul>
-                </article>
-            </section>
-
-            <!-- Section 2: Discussion Forum -->
-            <section id="discussion-forum">
-                <h2>Discussion</h2>
-
-                <div id="comment-list"></div>
-
-                <form id="comment-form" action="#">
-                    <fieldset>
-                        <legend>Ask a Question</legend>
-
-                        <label for="new-comment-text">Your Comment</label>
-                        <textarea id="new-comment-text" rows="4" required></textarea>
-
-                        <button id="hi" type="submit">Post Comment</button>
-                    </fieldset>
-                </form>
-            </section>
-        </main>
-    </div>
 </body>
 </html>

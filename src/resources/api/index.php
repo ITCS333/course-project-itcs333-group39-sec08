@@ -55,6 +55,8 @@
 // Allow cross-origin requests (CORS) if needed
 // Allow specific HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
 // Allow specific headers (Content-Type, Authorization)
+session_start();
+$_SESSION['user_id'] = $_SESSION['user_id'] ?? null;
 
 header("Content-Type:application/json");
 header("Access-Control-Allow-Origin: *");

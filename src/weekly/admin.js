@@ -1,203 +1,174 @@
-/*
-  admin.js - Manage Weekly Breakdown (client-side)
-  - Add / Edit / Delete weeks in-memory
-  - Validation and a modal confirmation for deletes
-*/
-
 let weeks = [];
-const __DEBUG = false;
+let editingWeekId = null;
 
-const weekForm = document.querySelector('#week-form');
-const weeksTableBody = document.querySelector('#weeks-tbody');
+const form = document.getElementById('week-form');
+const tbody = document.getElementById('weeks-tbody');
+const addBtn = document.getElementById('add-week');
 
-function createWeekRow(week) {
-  const tr = document.createElement('tr');
-  if (week && week.id) tr.setAttribute('data-id', week.id);
-  const tdTitle = document.createElement('td');
-  tdTitle.textContent = week.title || '';
-  tr.appendChild(tdTitle);
+function must(el, name) {
+  if (!el) throw new Error(`${name} is missing in HTML`);
+  return el;
+}
 
-  const tdDesc = document.createElement('td');
-  tdDesc.textContent = week.description || '';
-  tr.appendChild(tdDesc);
+must(form, '#week-form');
+must(tbody, '#weeks-tbody');
+must(addBtn, '#add-week');
 
-  const tdActions = document.createElement('td');
-  const group = document.createElement('div');
-  group.className = 'button-group';
+async function fetchJson(url, options = {}) {
+  const res = await fetch(url, options);
+  const text = await res.text();
 
-  const editBtn = document.createElement('button');
-  editBtn.type = 'button';
-  editBtn.className = 'edit edit-btn';
-  editBtn.setAttribute('data-id', week.id || '');
-  editBtn.textContent = 'Edit';
-
-  const deleteBtn = document.createElement('button');
-  deleteBtn.type = 'button';
-  deleteBtn.className = 'delete delete-btn secondary';
-  deleteBtn.setAttribute('data-id', week.id || '');
-  deleteBtn.textContent = 'Delete';
-
-  group.appendChild(editBtn);
-  group.appendChild(deleteBtn);
-  tdActions.appendChild(group);
-  tr.appendChild(tdActions);
-  return tr;
+  try {
+    return { ok: res.ok, json: JSON.parse(text), raw: text };
+  } catch {
+    console.error('❌ Non-JSON response:', text);
+    return { ok: false, json: { success: false, error: 'API returned non-JSON' }, raw: text };
+  }
 }
 
 function renderTable() {
-  if (!weeksTableBody) return;
-  weeksTableBody.innerHTML = '';
-  weeks.forEach(w => weeksTableBody.appendChild(createWeekRow(w)));
-}
+  tbody.innerHTML = '';
 
-function handleAddWeek(event) {
-  event.preventDefault();
-  if (!weekForm) return;
-  const titleInput = weekForm.querySelector('#week-title');
-  const startDateInput = weekForm.querySelector('#week-start-date');
-  const descInput = weekForm.querySelector('#week-description');
-  const linksInput = weekForm.querySelector('#week-links');
+  weeks.forEach(w => {
+    const tr = document.createElement('tr');
+    tr.dataset.id = w.id; // ✅ REQUIRED for edit/delete
 
-  const title = titleInput ? titleInput.value.trim() : '';
-  const startDate = startDateInput ? startDateInput.value : '';
-  const description = descInput ? descInput.value.trim() : '';
-  const linksRaw = linksInput ? linksInput.value.trim() : '';
-  const links = linksRaw ? linksRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+    tr.innerHTML = `
+      <td>${w.title ?? ''}</td>
+      <td>${w.description ?? ''}</td>
+      <td>
+        <div class="button-group">
+          <button type="button" class="edit" data-id="${w.id}">Edit</button>
+          <button type="button" class="delete" data-id="${w.id}">Delete</button>
+        </div>
+      </td>
+    `;
 
-  const newWeek = { id: `week_${Date.now()}`, title, startDate, description, links };
-
-  // editing
-  if (typeof window !== 'undefined' && window.__editingWeekId) {
-    const editId = window.__editingWeekId;
-    const idx = weeks.findIndex(w => String(w.id) === String(editId));
-    if (idx >= 0) {
-      weeks[idx] = Object.assign({}, weeks[idx], { title, startDate, description, links });
-      window.__editingWeekId = null;
-      const addBtn = document.getElementById('add-week'); if (addBtn) addBtn.textContent = 'Add Week';
-      // remove editing highlight if present
-      try { if (window.__editingRowElement && window.__editingRowElement.classList) window.__editingRowElement.classList.remove('editing'); window.__editingRowElement = null; } catch (err) {}
-      renderTable(); weekForm.reset(); return;
-    }
-  }
-
-  weeks.push(newWeek);
-  renderTable();
-  weekForm.reset();
-}
-
-function showConfirmModal(message) {
-  return new Promise((resolve) => {
-    const modal = document.getElementById('confirm-modal');
-    const msgEl = document.getElementById('confirm-message');
-    const confirmBtn = document.getElementById('confirm-delete');
-    const cancelBtn = document.getElementById('cancel-delete');
-    if (!modal || !msgEl || !confirmBtn || !cancelBtn) {
-      resolve(Boolean(window.confirm(message)));
-      return;
-    }
-    msgEl.textContent = message;
-    modal.style.display = 'block';
-    modal.setAttribute('aria-hidden', 'false');
-
-    const cleanup = () => {
-      modal.style.display = 'none';
-      modal.setAttribute('aria-hidden', 'true');
-      confirmBtn.removeEventListener('click', onConfirm);
-      cancelBtn.removeEventListener('click', onCancel);
-      modal.removeEventListener('click', onBackdrop);
-    };
-
-    const onConfirm = () => { cleanup(); resolve(true); };
-    const onCancel = () => { cleanup(); resolve(false); };
-    const onBackdrop = (e) => { if (e.target === modal || e.target.classList.contains('confirm-backdrop')) onCancel(); };
-
-    confirmBtn.addEventListener('click', onConfirm);
-    cancelBtn.addEventListener('click', onCancel);
-    modal.addEventListener('click', onBackdrop);
-    confirmBtn.focus();
+    tbody.appendChild(tr);
   });
 }
 
-async function handleTableClick(event) {
-  const btn = event.target.closest && event.target.closest('button');
-  const target = btn || event.target;
-  if (!target) return;
-  if (__DEBUG) console.debug('[admin] click', target, 'classes=', target.className);
+async function loadWeeks() {
+  const r = await fetchJson('./api/api.php?resource=weeks');
+  console.log('LOAD weeks:', r);
 
-  // Delete
-  if (target.classList.contains('delete-btn') || target.classList.contains('delete')) {
-    const id = target.getAttribute('data-id');
-    let titleToDelete = null;
-    if (id) {
-      const wk = weeks.find(w => String(w.id) === String(id)); if (wk) titleToDelete = wk.title || id;
-    }
-    if (!titleToDelete) {
-      const tr = target.closest && target.closest('tr'); if (tr) { const firstTd = tr.querySelector('td'); if (firstTd) titleToDelete = firstTd.textContent.trim(); }
-    }
-    const promptText = titleToDelete ? `Are you sure you want to delete the week "${titleToDelete}"?` : 'Are you sure you want to delete this week?';
-    const ok = await showConfirmModal(promptText);
-    if (!ok) return;
-    if (id) { weeks = weeks.filter(w => String(w.id) !== String(id)); renderTable(); return; }
-    const tr = target.closest && target.closest('tr'); if (tr) tr.remove(); return;
-  }
-
-  // Edit
-  if (target.classList.contains('edit-btn') || target.classList.contains('edit')) {
-    const id = target.getAttribute('data-id');
-    if (!id || !weekForm) return;
-    const wk = weeks.find(w => String(w.id) === String(id));
-    if (!wk) return;
-    const titleInput = weekForm.querySelector('#week-title');
-    const startDateInput = weekForm.querySelector('#week-start-date');
-    const descInput = weekForm.querySelector('#week-description');
-    const linksInput = weekForm.querySelector('#week-links');
-    if (titleInput) titleInput.value = wk.title || '';
-    if (startDateInput) startDateInput.value = wk.startDate || '';
-    if (descInput) descInput.value = wk.description || '';
-    if (linksInput) linksInput.value = Array.isArray(wk.links) ? wk.links.join('\n') : '';
-    if (typeof window !== 'undefined') window.__editingWeekId = id;
-    const addBtn = document.getElementById('add-week');
-    if (addBtn) addBtn.textContent = 'Update';
-
-    // Highlight the row being edited
-    try {
-      if (window.__editingRowElement && window.__editingRowElement.classList) {
-        window.__editingRowElement.classList.remove('editing');
-      }
-      const tr = target.closest && target.closest('tr');
-      if (tr) {
-        tr.classList.add('editing');
-        window.__editingRowElement = tr;
-      }
-    } catch (err) { /* ignore */ }
-
-    // Smoothly scroll the form into view but keep the edited row visible by offsetting for the header height
-    (function scrollToFormWithOffset(){
-      const form = document.getElementById('form-section');
-      if (!form) return;
-      const header = document.querySelector('header');
-      const headerHeight = header ? header.offsetHeight + 12 : 12; // small gap
-      const top = form.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-    })();
-
+  if (!r.ok || !r.json.success) {
+    alert(r.json.error || 'Failed to load weeks');
     return;
   }
-}
 
-async function loadAndInitialize() {
-  try {
-    const res = await fetch('api/weeks.json');
-    if (!res.ok) { weeks = []; }
-    else { const data = await res.json(); weeks = Array.isArray(data) ? data : []; }
-  } catch (err) { console.warn('Failed to load weeks.json', err); weeks = []; }
+  weeks = Array.isArray(r.json.data) ? r.json.data : [];
   renderTable();
-  if (weekForm) weekForm.addEventListener('submit', handleAddWeek);
-  if (weeksTableBody) weeksTableBody.addEventListener('click', handleTableClick);
-  document.addEventListener('click', function (e) {
-    const b = e.target.closest && e.target.closest('button'); if (!b) return; const cls = b.className || '';
-    if (cls.includes('delete') || cls.includes('edit')) { try { handleTableClick(e); } catch (err) { console.error(err); } }
-  });
 }
 
-loadAndInitialize();
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const titleEl = must(document.getElementById('week-title'), '#week-title');
+  const dateEl = must(document.getElementById('week-start-date'), '#week-start-date');
+  const descEl = must(document.getElementById('week-description'), '#week-description');
+
+  const payload = {
+    title: titleEl.value.trim(),
+    start_date: dateEl.value,
+    description: descEl.value.trim()
+  };
+
+  if (!payload.title || !payload.start_date) {
+    alert('Title and start date are required');
+    return;
+  }
+
+  // UPDATE
+  if (editingWeekId) {
+    payload.id = editingWeekId;
+    console.log('PUT payload:', payload);
+
+    const r = await fetchJson('./api/api.php?resource=weeks', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    console.log('PUT response:', r);
+
+    if (!r.ok || !r.json.success) {
+      alert(r.json.error || 'Update failed');
+      return;
+    }
+
+    editingWeekId = null;
+    addBtn.textContent = 'Add Week';
+    form.reset();
+    loadWeeks();
+    return;
+  }
+
+  // CREATE
+  console.log('POST payload:', payload);
+
+  const r = await fetchJson('./api/api.php?resource=weeks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  console.log('POST response:', r);
+
+  if (!r.ok || !r.json.success) {
+    alert(r.json.error || 'Create failed');
+    return;
+  }
+
+  form.reset();
+  loadWeeks();
+});
+
+tbody.addEventListener('click', async (e) => {
+  const btn = e.target.closest('button.edit, button.delete');
+  if (!btn) return;
+
+  const id = btn.dataset.id || btn.closest('tr')?.dataset?.id;
+  console.log('CLICK btn:', btn.className, 'id:', id);
+
+  if (!id) {
+    alert('Missing week id on row/button (data-id). Remove static rows and reload.');
+    return;
+  }
+
+  // DELETE
+  if (btn.classList.contains('delete')) {
+    if (!confirm('Delete this week?')) return;
+
+    const r = await fetchJson(`./api/api.php?resource=weeks&id=${id}`, { method: 'DELETE' });
+    console.log('DELETE response:', r);
+
+    if (!r.ok || !r.json.success) {
+      alert(r.json.error || 'Delete failed');
+      return;
+    }
+
+    loadWeeks();
+    return;
+  }
+
+  // EDIT
+  if (btn.classList.contains('edit')) {
+    const w = weeks.find(x => String(x.id) === String(id));
+    console.log('EDIT found week:', w);
+
+    if (!w) {
+      alert('Week not found in loaded data. Refresh page.');
+      return;
+    }
+
+    document.getElementById('week-title').value = w.title || '';
+    document.getElementById('week-start-date').value = w.start_date || '';
+    document.getElementById('week-description').value = w.description || '';
+
+    editingWeekId = w.id;
+    addBtn.textContent = 'Update Week';
+  }
+});
+
+loadWeeks();

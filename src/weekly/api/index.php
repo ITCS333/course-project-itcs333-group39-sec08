@@ -46,6 +46,11 @@ $data = json_decode(file_get_contents('php://input'), true) ?? [];
 $id = $_GET['id'] ?? null;
 $resource = $_GET['resource'] ?? 'weeks';
 
+// Initialize session data
+if (!isset($_SESSION['user_data'])) {
+    $_SESSION['user_data'] = [];
+}
+
 // =================================================
 // ================== WEEKS ========================
 // =================================================

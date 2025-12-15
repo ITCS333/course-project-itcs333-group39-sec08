@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // ================== DEBUG (REMOVE IN PRODUCTION) ==================
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

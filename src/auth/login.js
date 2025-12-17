@@ -1,542 +1,373 @@
 /*
- Admin Portal - Student Management System
- Connected to PHP API Backend
+  Client-side validation for login form
+  Clean, modular implementation
 */
 
-// --- API Configuration ---
-const API_BASE_URL = '/admin/api'; // Adjust based on your directory structure
+class LoginValidator {
+  // Static configuration
+  static config = {
+    emailRegex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    minPasswordLength: 8,
+    messageTimeout: 3000,
+    animationDuration: 500
+  };
 
-// --- Global Data Store ---
-let students = [];
+  // DOM elements
+  elements = {
+    form: null,
+    email: null,
+    password: null,
+    messageContainer: null,
+    submitButton: null,
+    buttonText: null,
+    buttonSpinner: null
+  };
 
-// --- Element Selections ---
-const studentTableBody = document.querySelector('#student-table tbody');
-const addStudentForm = document.querySelector('#add-student-form');
-const changePasswordForm = document.querySelector('#password-form');
-const searchInput = document.querySelector('#search-input');
-const tableHeaders = document.querySelectorAll('#student-table thead th[data-sort]');
+  // State tracking
+  state = {
+    isValid: false,
+    isSubmitting: false,
+    lastValidation: null
+  };
 
-// --- API Helper Functions ---
+  constructor() {
+    this.initializeElements();
+    this.bindEvents();
+    this.updateButtonState();
+  }
 
-/**
- * Make API request with error handling
- */
-async function apiRequest(endpoint, method = 'GET', data = null) {
-    const options = {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin' // Include session cookies
+  /**
+   * Initialize DOM elements
+   */
+  initializeElements() {
+    this.elements = {
+      form: document.getElementById('login-form'),
+      email: document.getElementById('email'),
+      password: document.getElementById('password'),
+      messageContainer: document.getElementById('message-container'),
+      submitButton: document.getElementById('login-btn'),
+      buttonText: document.getElementById('btn-text'),
+      buttonSpinner: document.getElementById('btn-spinner')
     };
 
-    if (data && (method === 'POST' || method === 'PUT')) {
-        options.body = JSON.stringify(data);
+    if (!this.elements.form) {
+      console.error('Login form not found');
+      return;
     }
+  }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/${endpoint}`, options);
-        
-        if (response.status === 401) {
-            // Unauthorized - redirect to login
-            window.location.href = '/login.php';
-            return null;
-        }
+  /**
+   * Bind event listeners
+   */
+  bindEvents() {
+    if (!this.elements.form) return;
 
-        const result = await response.json();
-        
-        if (!result.success) {
-            throw new Error(result.message || 'API request failed');
-        }
-        
-        return result;
-    } catch (error) {
-        console.error('API Request Error:', error);
-        throw error;
-    }
-}
+    // Form submission
+    this.elements.form.addEventListener('submit', this.handleSubmit.bind(this));
 
-/**
- * Load all students from API
- */
-async function loadStudents() {
-    try {
-        const result = await apiRequest('', 'GET');
-        if (result && result.data) {
-            students = result.data;
-            renderTable(students);
-        }
-    } catch (error) {
-        console.error('Failed to load students:', error);
-        alert('Failed to load students. Please check your connection.');
-        // Fallback to empty array
-        students = [];
-        renderTable(students);
-    }
-}
+    // Real-time validation
+    this.elements.email.addEventListener('input', this.validateEmail.bind(this));
+    this.elements.password.addEventListener('input', this.validatePassword.bind(this));
 
-/**
- * Create a new student via API
- */
-async function createStudent(studentData) {
-    try {
-        const result = await apiRequest('', 'POST', studentData);
-        if (result && result.success) {
-            // Reload students to get updated list
-            await loadStudents();
-            return result;
-        }
-    } catch (error) {
-        console.error('Failed to create student:', error);
-        throw error;
-    }
-}
+    // Blur validation for final check
+    this.elements.email.addEventListener('blur', this.validateEmailFinal.bind(this));
+    this.elements.password.addEventListener('blur', this.validatePasswordFinal.bind(this));
 
-/**
- * Update student via API
- */
-async function updateStudent(studentId, studentData) {
-    try {
-        const result = await apiRequest('', 'PUT', {
-            student_id: studentId,
-            ...studentData
-        });
-        if (result && result.success) {
-            await loadStudents(); // Reload to get updated data
-            return result;
-        }
-    } catch (error) {
-        console.error('Failed to update student:', error);
-        throw error;
-    }
-}
+    // Clear validation on focus
+    this.elements.email.addEventListener('focus', this.clearFieldValidation.bind(this, 'email'));
+    this.elements.password.addEventListener('focus', this.clearFieldValidation.bind(this, 'password'));
+  }
 
-/**
- * Delete student via API
- */
-async function deleteStudent(studentId) {
-    try {
-        const result = await apiRequest(`?student_id=${studentId}`, 'DELETE');
-        if (result && result.success) {
-            await loadStudents(); // Reload to get updated data
-            return result;
-        }
-    } catch (error) {
-        console.error('Failed to delete student:', error);
-        throw error;
-    }
-}
-
-/**
- * Change password via API
- */
-async function changePassword(passwordData) {
-    try {
-        const result = await apiRequest('?action=change_password', 'POST', passwordData);
-        if (result && result.success) {
-            return result;
-        }
-    } catch (error) {
-        console.error('Failed to change password:', error);
-        throw error;
-    }
-}
-
-// --- UI Functions ---
-
-/**
- * Create a table row for a student
- */
-function createStudentRow(student) {
-    const row = document.createElement('tr');
+  /**
+   * Validate email format
+   */
+  validateEmail() {
+    const email = this.elements.email.value.trim();
+    const isValid = LoginValidator.config.emailRegex.test(email);
     
-    // Name cell
-    const nameCell = document.createElement('td');
-    nameCell.textContent = student.name;
-    row.appendChild(nameCell);
-    
-    // ID cell
-    const idCell = document.createElement('td');
-    idCell.textContent = student.student_id;
-    row.appendChild(idCell);
-    
-    // Email cell
-    const emailCell = document.createElement('td');
-    emailCell.textContent = student.email;
-    row.appendChild(emailCell);
-    
-    // Actions cell
-    const actionsCell = document.createElement('td');
-    
-    // Edit button
-    const editButton = document.createElement('button');
-    editButton.textContent = 'Edit';
-    editButton.className = 'edit-btn btn btn-sm btn-warning me-2';
-    editButton.setAttribute('data-id', student.student_id);
-    actionsCell.appendChild(editButton);
-    
-    // Delete button
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.className = 'delete-btn btn btn-sm btn-danger';
-    deleteButton.setAttribute('data-id', student.student_id);
-    actionsCell.appendChild(deleteButton);
-    
-    row.appendChild(actionsCell);
-    return row;
-}
-
-/**
- * Render the student table
- */
-function renderTable(studentArray) {
-    studentTableBody.innerHTML = '';
-    
-    if (studentArray.length === 0) {
-        const emptyRow = document.createElement('tr');
-        const emptyCell = document.createElement('td');
-        emptyCell.colSpan = 4;
-        emptyCell.textContent = 'No students found.';
-        emptyCell.className = 'text-center text-muted py-4';
-        emptyRow.appendChild(emptyCell);
-        studentTableBody.appendChild(emptyRow);
-        return;
-    }
-    
-    studentArray.forEach(student => {
-        const row = createStudentRow(student);
-        studentTableBody.appendChild(row);
-    });
-}
-
-/**
- * Handle password change form submission
- */
-async function handleChangePassword(event) {
-    event.preventDefault();
-    
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-    
-    if (newPassword !== confirmPassword) {
-        alert('Passwords do not match.');
-        return;
-    }
-    
-    if (newPassword.length < 8) {
-        alert('Password must be at least 8 characters.');
-        return;
-    }
-    
-    try {
-        // For admin changing own password, you might need a different endpoint
-        // This currently uses the student password change endpoint
-        const passwordData = {
-            student_id: 'admin', // You need to handle admin password separately
-            current_password: currentPassword,
-            new_password: newPassword
-        };
-        
-        await changePassword(passwordData);
-        alert('Password updated successfully!');
-        
-        // Clear form fields
-        document.getElementById('current-password').value = '';
-        document.getElementById('new-password').value = '';
-        document.getElementById('confirm-password').value = '';
-        
-    } catch (error) {
-        alert('Failed to change password: ' + error.message);
-    }
-}
-
-/**
- * Handle add student form submission
- */
-async function handleAddStudent(event) {
-    event.preventDefault();
-    
-    const name = document.getElementById('student-name').value.trim();
-    const studentId = document.getElementById('student-id').value.trim();
-    const email = document.getElementById('student-email').value.trim();
-    const password = document.getElementById('default-password').value;
-    
-    // Validation
-    if (!name || !studentId || !email || !password) {
-        alert('Please fill out all required fields.');
-        return;
-    }
-    
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        alert('Please enter a valid email address.');
-        return;
-    }
-    
-    try {
-        const studentData = {
-            student_id: studentId,
-            name: name,
-            email: email,
-            password: password
-        };
-        
-        await createStudent(studentData);
-        
-        // Clear form fields
-        addStudentForm.reset();
-        document.getElementById('default-password').value = 'password123';
-        
-        // Close the details element
-        const details = document.querySelector('details');
-        if (details) {
-            details.removeAttribute('open');
-        }
-        
-        alert(`Student "${name}" added successfully!`);
-        
-    } catch (error) {
-        alert('Failed to add student: ' + error.message);
-    }
-}
-
-/**
- * Handle table actions (edit/delete)
- */
-async function handleTableClick(event) {
-    const target = event.target;
-    
-    // Delete button clicked
-    if (target.classList.contains('delete-btn')) {
-        const studentId = target.getAttribute('data-id');
-        const student = students.find(s => s.student_id === studentId);
-        
-        if (student && confirm(`Are you sure you want to delete ${student.name}?`)) {
-            try {
-                await deleteStudent(studentId);
-                alert(`${student.name} has been deleted.`);
-            } catch (error) {
-                alert('Failed to delete student: ' + error.message);
-            }
-        }
-    }
-    
-    // Edit button clicked
-    if (target.classList.contains('edit-btn')) {
-        const studentId = target.getAttribute('data-id');
-        const student = students.find(s => s.student_id === studentId);
-        
-        if (student) {
-            // Fill the form fields with the student data
-            document.getElementById('student-name').value = student.name;
-            document.getElementById('student-id').value = student.student_id;
-            document.getElementById('student-email').value = student.email;
-            document.getElementById('default-password').value = ''; // Clear password field for editing
-            
-            // Disable editing the ID
-            document.getElementById('student-id').setAttribute('disabled', 'disabled');
-            
-            // Open the details element if closed
-            const details = document.querySelector('details');
-            if (details) {
-                details.setAttribute('open', 'open');
-            }
-            
-            // Change the Add button to Update
-            const addBtn = document.getElementById('add');
-            addBtn.textContent = 'Update';
-            addBtn.classList.remove('btn-success');
-            addBtn.classList.add('btn-primary');
-            addBtn.dataset.editing = 'true';
-            addBtn.dataset.editId = studentId;
-        }
-    }
-}
-
-/**
- * Handle search functionality
- */
-function handleSearch(event) {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    
-    if (!searchTerm) {
-        renderTable(students);
-        return;
-    }
-    
-    const filteredStudents = students.filter(student =>
-        student.name.toLowerCase().includes(searchTerm) ||
-        student.student_id.toLowerCase().includes(searchTerm) ||
-        student.email.toLowerCase().includes(searchTerm)
+    this.updateFieldValidation('email', isValid, 
+      isValid ? '' : 'Invalid email format'
     );
     
-    renderTable(filteredStudents);
-}
+    this.checkFormValidity();
+    return isValid;
+  }
 
-/**
- * Handle table sorting
- */
-function handleSort(event) {
-    const th = event.currentTarget;
-    const sortBy = th.getAttribute('data-sort');
+  /**
+   * Final email validation on blur
+   */
+  validateEmailFinal() {
+    const email = this.elements.email.value.trim();
+    const isValid = email ? LoginValidator.config.emailRegex.test(email) : false;
     
-    // Map UI sort field to API field names
-    const fieldMap = {
-        'name': 'name',
-        'id': 'student_id',
-        'email': 'email'
-    };
+    this.updateFieldValidation('email', isValid, 
+      !email ? 'Email is required' : 
+      !isValid ? 'Invalid email format' : ''
+    );
+  }
+
+  /**
+   * Validate password length
+   */
+  validatePassword() {
+    const password = this.elements.password.value.trim();
+    const isValid = password.length >= LoginValidator.config.minPasswordLength;
     
-    const apiField = fieldMap[sortBy] || sortBy;
+    this.updateFieldValidation('password', isValid,
+      isValid ? '' : `Password must be at least ${LoginValidator.config.minPasswordLength} characters`
+    );
     
-    // Remove sort indicators from other headers
-    tableHeaders.forEach(header => {
-        header.classList.remove('sorted-asc', 'sorted-desc');
-    });
+    this.checkFormValidity();
+    return isValid;
+  }
+
+  /**
+   * Final password validation on blur
+   */
+  validatePasswordFinal() {
+    const password = this.elements.password.value.trim();
+    const isValid = password.length >= LoginValidator.config.minPasswordLength;
     
-    // Determine sort direction
-    let sortDirection = 'asc';
-    if (th.classList.contains('sorted-asc')) {
-        sortDirection = 'desc';
-        th.classList.remove('sorted-asc');
-        th.classList.add('sorted-desc');
-    } else if (th.classList.contains('sorted-desc')) {
-        sortDirection = 'asc';
-        th.classList.remove('sorted-desc');
-        th.classList.add('sorted-asc');
-    } else {
-        th.classList.add('sorted-asc');
+    this.updateFieldValidation('password', isValid,
+      !password ? 'Password is required' :
+      !isValid ? `Password must be at least ${LoginValidator.config.minPasswordLength} characters` : ''
+    );
+  }
+
+  /**
+   * Update field validation state
+   */
+  updateFieldValidation(field, isValid, message = '') {
+    const input = this.elements[field];
+    const feedback = input.nextElementSibling;
+    
+    input.classList.remove('is-valid', 'is-invalid');
+    input.classList.add(isValid ? 'is-valid' : 'is-invalid');
+    
+    if (feedback && feedback.classList.contains('invalid-feedback')) {
+      if (message) {
+        feedback.textContent = message;
+        feedback.style.display = 'block';
+      } else {
+        feedback.style.display = 'none';
+      }
+    }
+  }
+
+  /**
+   * Clear field validation styling
+   */
+  clearFieldValidation(field) {
+    const input = this.elements[field];
+    const feedback = input.nextElementSibling;
+    
+    input.classList.remove('is-valid', 'is-invalid');
+    
+    if (feedback && feedback.classList.contains('invalid-feedback')) {
+      feedback.style.display = 'none';
+    }
+  }
+
+  /**
+   * Check overall form validity
+   */
+  checkFormValidity() {
+    const emailValid = LoginValidator.config.emailRegex.test(this.elements.email.value.trim());
+    const passwordValid = this.elements.password.value.trim().length >= LoginValidator.config.minPasswordLength;
+    
+    this.state.isValid = emailValid && passwordValid;
+    this.updateButtonState();
+    
+    return this.state.isValid;
+  }
+
+  /**
+   * Update submit button state
+   */
+  updateButtonState() {
+    if (!this.elements.submitButton) return;
+    
+    this.elements.submitButton.disabled = !this.state.isValid || this.state.isSubmitting;
+  }
+
+  /**
+   * Display message to user
+   */
+  displayMessage(message, type = 'error') {
+    if (!this.elements.messageContainer) return;
+
+    const container = this.elements.messageContainer;
+    
+    // Set message and styling
+    container.textContent = message;
+    container.className = `alert alert-${type === 'success' ? 'success' : 'danger'} d-block`;
+    container.setAttribute('role', 'alert');
+    
+    // Auto-hide success messages
+    if (type === 'success') {
+      setTimeout(() => {
+        container.classList.remove('d-block');
+        container.classList.add('d-none');
+      }, LoginValidator.config.messageTimeout);
     }
     
-    // Sort the students array
-    students.sort((a, b) => {
-        let aValue = a[apiField];
-        let bValue = b[apiField];
-        
-        if (apiField === 'student_id') {
-            // For IDs, compare as numbers if possible
-            const aNum = parseInt(aValue);
-            const bNum = parseInt(bValue);
-            if (!isNaN(aNum) && !isNaN(bNum)) {
-                aValue = aNum;
-                bValue = bNum;
-            }
-        }
-        
-        let comparison = 0;
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-            comparison = aValue.localeCompare(bValue, undefined, { sensitivity: 'base' });
-        } else {
-            if (aValue < bValue) comparison = -1;
-            if (aValue > bValue) comparison = 1;
-        }
-        
-        return sortDirection === 'asc' ? comparison : -comparison;
-    });
-    
-    renderTable(students);
-}
+    // Add animation
+    container.classList.add('fade-in');
+    setTimeout(() => container.classList.remove('fade-in'), 300);
+  }
 
-/**
- * Initialize the application
- */
-function initializeApp() {
-    // Load initial data
-    loadStudents();
+  /**
+   * Add shake animation to form
+   */
+  addShakeAnimation() {
+    this.elements.form.classList.add('shake');
+    setTimeout(() => {
+      this.elements.form.classList.remove('shake');
+    }, LoginValidator.config.animationDuration);
+  }
+
+  /**
+   * Show loading state
+   */
+  showLoading() {
+    this.state.isSubmitting = true;
     
-    // Set up event listeners
-    changePasswordForm.addEventListener('submit', handleChangePassword);
-    
-    addStudentForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        const addBtn = document.getElementById('add');
-        
-        if (addBtn.dataset.editing === 'true') {
-            // Update mode
-            const editId = addBtn.dataset.editId;
-            const student = students.find(s => s.student_id === editId);
-            
-            if (student) {
-                const name = document.getElementById('student-name').value.trim();
-                const email = document.getElementById('student-email').value.trim();
-                
-                // Validation
-                if (!name || !email) {
-                    alert('Please fill out all required fields.');
-                    return;
-                }
-                
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    alert('Please enter a valid email address.');
-                    return;
-                }
-                
-                try {
-                    await updateStudent(editId, { name, email });
-                    
-                    alert('Student information updated successfully!');
-                    
-                    // Reset form
-                    addBtn.textContent = 'Add Student';
-                    addBtn.classList.remove('btn-primary');
-                    addBtn.classList.add('btn-success');
-                    delete addBtn.dataset.editing;
-                    delete addBtn.dataset.editId;
-                    
-                    document.getElementById('student-id').removeAttribute('disabled');
-                    addStudentForm.reset();
-                    document.getElementById('default-password').value = 'password123';
-                    
-                    // Close details
-                    const details = document.querySelector('details');
-                    if (details) {
-                        details.removeAttribute('open');
-                    }
-                    
-                } catch (error) {
-                    alert('Failed to update student: ' + error.message);
-                }
-            }
-        } else {
-            handleAddStudent(event);
-        }
-    });
-    
-    studentTableBody.addEventListener('click', handleTableClick);
-    searchInput.addEventListener('input', handleSearch);
-    
-    tableHeaders.forEach(th => {
-        th.addEventListener('click', handleSort);
-    });
-    
-    // Add sort indicators
-    tableHeaders.forEach(th => {
-        th.innerHTML = `${th.textContent} <span class="sort-indicator">↕</span>`;
-    });
-    
-    // Add logout button functionality
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                // Call logout API if you have one
-                // await fetch('/logout.php', { method: 'POST' });
-                
-                // Clear session and redirect
-                sessionStorage.clear();
-                localStorage.clear();
-                window.location.href = '/login.php';
-            } catch (error) {
-                console.error('Logout error:', error);
-                window.location.href = '/login.php';
-            }
-        });
+    if (this.elements.buttonText && this.elements.buttonSpinner) {
+      this.elements.buttonText.textContent = 'Signing in...';
+      this.elements.buttonSpinner.classList.remove('d-none');
     }
+    
+    this.updateButtonState();
+  }
+
+  /**
+   * Hide loading state
+   */
+  hideLoading() {
+    this.state.isSubmitting = false;
+    
+    if (this.elements.buttonText && this.elements.buttonSpinner) {
+      this.elements.buttonText.textContent = 'Sign In';
+      this.elements.buttonSpinner.classList.add('d-none');
+    }
+    
+    this.updateButtonState();
+  }
+
+  /**
+   * Handle form submission
+   */
+  async handleSubmit(event) {
+    event.preventDefault();
+    
+    // Final validation
+    if (!this.checkFormValidity()) {
+      this.displayMessage('Please fix the errors above before submitting.', 'error');
+      this.addShakeAnimation();
+      return;
+    }
+    
+    // Show loading state
+    this.showLoading();
+    
+    try {
+      // Prepare form data
+      const formData = {
+        email: this.elements.email.value.trim(),
+        password: this.elements.password.value.trim()
+      };
+      
+      // Simulate API call (replace with actual API call)
+      await this.simulateApiCall(formData);
+      
+      // Success handling
+      this.displayMessage('Login successful! Redirecting...', 'success');
+      
+      // Simulate redirect (replace with actual redirect)
+      setTimeout(() => {
+        window.location.href = '/dashboard.html';
+      }, 1500);
+      
+    } catch (error) {
+      // Error handling
+      this.displayMessage(error.message || 'Login failed. Please try again.', 'error');
+      this.addShakeAnimation();
+      this.hideLoading();
+    }
+  }
+
+  /**
+   * Simulate API call (replace with actual API integration)
+   */
+  async simulateApiCall(formData) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simulate 80% success rate for demo
+        const isSuccess = Math.random() < 0.8;
+        
+        if (isSuccess) {
+          resolve({
+            success: true,
+            message: 'Login successful',
+            user: { email: formData.email }
+          });
+        } else {
+          reject(new Error('Invalid email or password'));
+        }
+      }, 1500);
+    });
+  }
+
+  /**
+   * Real API integration example
+   */
+  async callLoginApi(formData) {
+    try {
+      const response = await fetch('/auth/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      return data;
+      
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Public validation methods for testing
+   */
+  static validateEmail(email) {
+    return LoginValidator.config.emailRegex.test(email);
+  }
+
+  static validatePassword(password) {
+    return password.length >= LoginValidator.config.minPasswordLength;
+  }
 }
 
-// --- Initialize Application ---
-document.addEventListener('DOMContentLoaded', initializeApp);
+// Initialize the validator when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  const validator = new LoginValidator();
+  
+  // Expose for testing if needed
+  window.loginValidator = validator;
+});
+
+// Export for testing (if using modules)
+// export { LoginValidator };

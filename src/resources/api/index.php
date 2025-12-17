@@ -62,13 +62,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
-<?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-echo "API IS WORKING ✅";
-exit;
 
 // TODO: Handle preflight OPTIONS request
 // If the request method is OPTIONS, return 200 status and exit
@@ -82,13 +75,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Assume the Database class has a method getConnection() that returns a PDO instance
 // Example: require_once '../config/Database.php';
 
-require __DIR__ . '/../../../db.php';
+try {
+    require_once __DIR__ . '/../../../../includes/db.php';
+    $database = new Database();
+    $db = $database->getConnection();
 
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection failed']);
+    exit;
+}
 // TODO: Get the PDO database connection
 // Example: $database = new Database();
 // Example: $db = $database->getConnection();
 
-$db=$pdo;
+
 
 // TODO: Get the HTTP request method
 // Use $_SERVER['REQUEST_METHOD']

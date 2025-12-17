@@ -1,21 +1,23 @@
 <?php
-// src/auth/api/index.php
 header('Content-Type: application/json');
 
-// Simple test response
-$data = json_decode(file_get_contents('php://input'), true);
+// Get JSON data from request
+$rawData = file_get_contents("php://input");
+$data = json_decode($rawData, true);
 
+// Check if data was received
 if (!$data) {
     echo json_encode(['success' => false, 'message' => 'No data received']);
     exit;
 }
 
+// Check required fields
 if (!isset($data['email']) || !isset($data['password'])) {
     echo json_encode(['success' => false, 'message' => 'Email and password required']);
     exit;
 }
 
-// Simple validation
+// Get and validate email
 $email = filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL);
 $password = $data['password'];
 

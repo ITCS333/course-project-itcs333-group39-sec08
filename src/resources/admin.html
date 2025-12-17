@@ -18,6 +18,302 @@
      <title>Manage Resources</title>
     <!-- TODO: Link to your CSS framework or stylesheet. -->
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+
+     <style>
+          /* Improved base page spacing */
+          body {
+              padding: 1.5rem;
+              margin: 0;
+              font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              background-color: #f8fafc;
+              line-height: 1.5;
+          }
+  
+          /* Container for better content alignment */
+          .container {
+              max-width: 1000px;
+              margin: 0 auto;
+              background-color: var(--surface);
+              border-radius: 14px;
+              padding: 2rem;
+              box-shadow: 0 8px 30px rgba(3, 38, 76, 0.05);
+          }
+  
+          /* Header styling */
+          header {
+              text-align: center;
+              margin-bottom: 2.5rem;
+              padding-bottom: 1.5rem;
+              border-bottom: 1px solid #e9ecef;
+          }
+  
+          header h1 {
+              color: #000000;
+              font-size: 2rem;
+              font-weight: 700;
+              margin: 0;
+              padding: 0.5rem 0;
+          }
+  
+          /* Sections spacing and styling */
+          section {
+              margin-bottom: 2.5rem;
+              padding: 1.5rem;
+              background-color: white;
+              border-radius: 10px;
+              border: 1px solid #e9ecef;
+          }
+  
+          section h2 {
+              color: var(--primary);
+              font-size: 1.5rem;
+              font-weight: 600;
+              margin-top: 0;
+              margin-bottom: 1.5rem;
+              padding-bottom: 0.6rem;
+              border-bottom: 2px solid rgba(36, 43, 49, 0.12);
+          }
+  
+          /* Table layout improvements */
+          table {
+              margin-top: 1rem;
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.94rem;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+              border: 2px solid #000000;
+          }
+  
+          table th {
+              background-color: rgba(149, 152, 156, 0.06);
+              color: var(--primary);
+              font-weight: 600;
+              padding: 1rem;
+              text-align: left;
+              border-bottom: 2px solid rgba(0, 102, 204, 0.08);
+          }
+  
+          table td {
+              padding: 1rem;
+              border-bottom: 1px solid #e9ecef;
+              vertical-align: middle;
+          }
+  
+          table tbody tr:hover {
+              background-color: #f1f5f9;
+              transition: background-color 0.2s ease;
+          }
+  
+          /* Color variables (unified primary palette) */
+          :root {
+              --primary: #0066cc;
+              --primary-600: #0055aa;
+              --muted: #6c757d;
+              --surface: #ffffff;
+              --border: #e9ecef;
+          }
+  
+          /* Buttons: unified smooth styling using --primary */
+          .button-group {
+              display: flex;
+              flex-direction: row;
+              gap: 1.5rem; /* Increased spacing between buttons */
+              align-items: center;
+          }
+  
+          /* Base button style (primary) */
+          button {
+              padding: 0.5rem 0.95rem;
+              font-size: 0.92rem;
+              border-radius: 10px;
+              border: none;
+              background-color: var(--primary);
+              color: white;
+              font-weight: 600;
+              cursor: pointer;
+              transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+              box-shadow: 0 6px 18px rgba(3, 38, 76, 0.06);
+          }
+  
+          button:hover {
+              background-color: var(--primary-600);
+              box-shadow: 0 10px 24px rgba(3, 38, 76, 0.08);
+              transform: translateY(-2px);
+          }
+  
+          button:active {
+              transform: translateY(0);
+          }
+  
+          /* Edit button keeps primary look */
+          .button-group .edit {
+              background-color: var(--primary);
+              color: white;
+              border: none;
+              padding: 0.45rem 0.9rem;
+              line-height: 1;
+          }
+  
+          /* Make Delete more visible: solid muted button with white text */
+          .button-group .delete {
+              background-color: var(--muted); /* Gray color */
+              color: white;
+              border: none;
+              padding: 0.45rem 0.9rem;
+          }
+  
+          .button-group .delete:hover {
+              background-color: #5a6268;
+              color: white;
+          }
+  
+          /* Ensure action buttons share a minimum width so labels are visible and buttons align */
+          .button-group button,
+          #add-resource {
+              min-width: 84px;
+              padding-left: 0.9rem;
+              padding-right: 0.9rem;
+          }
+  
+          /* Normalize action button sizing so Edit / Delete / Add have identical height */
+          .button-group button,
+          #add-resource {
+              box-sizing: border-box;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              height: 38px;
+              padding-left: 0.9rem;
+              padding-right: 0.9rem;
+          }
+  
+          /* Form styling improvements */
+          form label {
+              display: block;
+              margin-top: 1rem;
+              margin-bottom: 0.5rem;
+              font-size: 0.95rem;
+              font-weight: 500;
+              color: #2d3748;
+          }
+  
+          form input,
+          form textarea {
+              margin-bottom: 1rem;
+              font-size: 0.95rem;
+              padding: 0.75rem;
+              border: 1px solid #e2e8f0;
+              border-radius: 6px;
+              width: 100%;
+              transition: border-color 0.2s ease;
+          }
+  
+          form input:focus,
+          form textarea:focus {
+              outline: none;
+              border-color: var(--accent);
+              box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+          }
+  
+          /* Form container styling */
+          #form-section {
+              border: 1px solid var(--border);
+              border-radius: 12px;
+              padding: 1.5rem;
+              background-color: var(--surface);
+              margin: 0 auto 2rem auto;
+              box-shadow: 0 8px 24px rgba(3, 38, 76, 0.03);
+              max-width: 100%;
+          }
+  
+          #form-section fieldset {
+              border: 1px solid #f1f3f5;
+              border-radius: 8px;
+              padding: 1.5rem;
+              background: white;
+              margin: 0;
+          }
+  
+          #form-section legend {
+              font-weight: 600;
+              color: #495057;
+              padding: 0 1rem;
+              font-size: 1.1rem;
+          }
+  
+          /* Add/Update button: match size/dimensions of the action buttons (Delete/Edit) */
+          #add-resource {
+              margin-top: 1.5rem;
+              font-weight: 600;
+              font-size: 0.92rem;
+              padding: 0.45rem 0.9rem;
+              border-radius: 6px;
+              background-color: var(--primary);
+              color: white;
+              border: none;
+              cursor: pointer;
+              transition: transform 180ms ease, box-shadow 180ms ease;
+              display: block;
+              width: auto;
+              max-width: none;
+              margin-left: auto;
+              margin-right: auto;
+              box-shadow: 0 8px 20px rgba(3, 38, 76, 0.06);
+              line-height: 1;
+          }
+  
+          #add-resource:hover {
+              background-color: var(--primary-600);
+              transform: translateY(-2px);
+              box-shadow: 0 12px 26px rgba(3, 38, 76, 0.08);
+          }
+  
+          /* Alternate row color */
+          table tbody tr:nth-child(even) {
+              background-color: #f8fafc;
+          }
+  
+          table tbody tr:nth-child(even):hover {
+              background-color: #f1f5f9;
+          }
+  
+          /* Responsive design */
+          @media (max-width: 768px) {
+              .container {
+                  padding: 1rem;
+                  margin: 0.5rem;
+              }
+              
+              section {
+                  padding: 1rem;
+              }
+              
+              table {
+                  font-size: 0.85rem;
+              }
+              
+              .button-group {
+                  flex-direction: column;
+                  gap: 0.5rem;
+              }
+              
+              .button-group button {
+                  width: 100%;
+                  min-width: auto;
+              }
+              
+              header h1 {
+                  font-size: 1.5rem;
+              }
+              
+              section h2 {
+                  font-size: 1.25rem;
+              }
+          }
+      </style>
+      
 </head>
 <body>
 
@@ -125,5 +421,4 @@
       <script src="admin.js" defer></script>
 </body>
 </html>
-
 

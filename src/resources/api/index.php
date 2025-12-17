@@ -49,19 +49,26 @@
 // ============================================================================
 // HEADERS AND INITIALIZATION
 // ============================================================================
-
+session_start();
+$_SESSION['user_id'] = $_SESSION['user_id'] ?? null;
 // TODO: Set headers for JSON response and CORS
 // Set Content-Type to application/json
 // Allow cross-origin requests (CORS) if needed
 // Allow specific HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
 // Allow specific headers (Content-Type, Authorization)
-session_start();
-$_SESSION['user_id'] = $_SESSION['user_id'] ?? null;
 
 header("Content-Type:application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+echo "API IS WORKING ✅";
+exit;
 
 // TODO: Handle preflight OPTIONS request
 // If the request method is OPTIONS, return 200 status and exit
@@ -150,27 +157,9 @@ function getAllResources($db) {
     // Only allow: asc, desc
     // Default to desc if not provided or invalid
     
-    $sort = "";
-    if (!empty($_GET['sort'])) {
-        $sort = $_GET['sort'];
-    }
+    $order = strtolower($_GET['order'] ?? 'desc');
+    if ($order !== 'asc' && $order !== 'desc') $order = 'desc';
     
-    $order = "asc";
-    if (!empty($_GET['order'])) {
-        $order = $_GET['order'];
-    }
-    if ($sort !== "") {
-        $allowedSortFields = ['title', 'due_date', 'created_at'];
-        $allowedOrderValues = ['asc', 'desc'];
-
-        if (!in_array($sort, $allowedSortFields)) {
-            $sort = 'created_at'; // Default sort field
-        }
-
-        if (!in_array(strtolower($order), $allowedOrderValues)) {
-            $order = 'asc';
-        }
-    }
     // TODO: Add ORDER BY clause to query
 
     $sql .= " ORDER BY $sort $order";
@@ -197,7 +186,7 @@ function getAllResources($db) {
     // TODO: Return JSON response with success status and data
     // Use the helper function sendResponse()
 
-    sendResponse(true, $results);
+    sendResponse(["success" => true, "data" => $results], 200);
 
 } 
  
@@ -229,12 +218,12 @@ function getResourceById($db, $resourceId) {
     // TODO: Prepare SQL query to select resource by id
     // SELECT id, title, description, link, created_at FROM resources WHERE id = ?
 
-    $sql = "SELECT id, title, description, link, created_at FROM resources WHERE id = :id";
+    $sql = "SELECT id, title, description, link, created_at FROM resources WHERE id = ?";
 
     // TODO: Bind the resource_id parameter
 
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $resourceId, PDO::PARAM_INT);
+    $stmt->bindValue(':id', $resourceId);
 
     // TODO: Execute the query
 
@@ -322,14 +311,10 @@ function createResource($db, $data) {
     // TODO: Bind parameters
     // Bind title, description, and link
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':title', $title);
-    $stmt->bindValue(':description', $description);
-    $stmt->bindValue(':link', $link);
 
-
-    $stmt->bindValue(1, $title, PDO::PARAM_STR);
-$stmt->bindValue(2, $description, PDO::PARAM_STR);
-$stmt->bindValue(3, $link, PDO::PARAM_STR);
+    $stmt->bindValue(1, $title);
+    $stmt->bindValue(2, $description);
+    $stmt->bindValue(3, $link);
 
     // TODO: Execute the query
     
@@ -440,21 +425,23 @@ function updateResource($db, $data) {
     // Use filter_var with FILTER_VALIDATE_URL
     // If invalid, return error response with 400 status
     
-    if (!filter_var($link, FILTER_VALIDATE_URL)) {
-        http_response_code(400);
-        echo json_encode([
-            "success" => false,
-            "message" => "Invalid URL format"
-        ]);
-        return;
+    if (isset($data['link']) && trim($data['link']) !== '') {
+        $link = trim($data['link']);
+    
+        if (!filter_var($link, FILTER_VALIDATE_URL)) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Invalid URL format"]);
+            return;
+        }
+    
+        $fields[] = "link = :link";
+        $params[':link'] = $link;
     }
-    $fields[] = "link = :link";
-    $params[':link'] = $link;
 
     // TODO: Build the complete UPDATE SQL query
     // UPDATE resources SET field1 = ?, field2 = ? WHERE id = ?
     
-    $sql = "UPDATE resources SET " . implode(", ", $fields) . " WHERE id = :id";
+    $sql = "UPDATE resources SET " . implode(", ", $fields) . " WHERE id = :?";
 
     // TODO: Prepare the query
     
@@ -547,7 +534,7 @@ function deleteResource($db, $resourceId) {
         // Prepare DELETE query for comments table
         // DELETE FROM comments WHERE resource_id = ?
         
-        $delCommentsSql = "DELETE FROM comments WHERE resource_id = :rid";
+        $delCommentsSql = "DELETE FROM comments_resource WHERE resource_id = :rid";
         $delCommentsStmt = $db->prepare($delCommentsSql);
 
         // TODO: Bind resource_id and execute
@@ -634,10 +621,13 @@ function getCommentsByResourceId($db, $resourceId) {
     // WHERE resource_id = ? 
     // ORDER BY created_at ASC
     
-    $sql = "SELECT id, resource_id, author, text, created_at  FROM comments WHERE resource_id = :rid ORDER BY created_at ASC";
+    $sql = "SELECT id, resource_id, author, text, created_at  FROM comments_resource WHERE resource_id = :? ORDER BY created_at ASC";
 
-    // TODO: Bind the resource_id parameter
-    $stmt->bindValue(':rid', $resourceId)
+    // TODO: Bind the resource_id paramete
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(1, $resourceId);
+
     // TODO: Execute the query
 
     $stmt->execute();
@@ -724,16 +714,16 @@ function createComment($db, $data) {
     // TODO: Prepare INSERT query
     // INSERT INTO comments (resource_id, author, text) VALUES (?, ?, ?)
     
-    $sql = "INSERT INTO comments (resource_id, author, text)
-    VALUES (:resource_id, :author, :text)";
+    $sql = "INSERT INTO comments_resource (resource_id, author, text)
+    VALUES (?, ?, ?)";
 
     // TODO: Bind parameters
     // Bind resource_id, author, and text
     
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':resource_id', $resourceId);
-    $stmt->bindValue(':author', $author,);
-    $stmt->bindValue(':text', $text);
+    $stmt->bindValue(1, $resourceId);
+    $stmt->bindValue(2, $author);
+    $stmt->bindValue(3, $text);
 
     // TODO: Execute the query
     
@@ -791,7 +781,7 @@ function deleteComment($db, $commentId) {
     // Prepare and execute a SELECT query
     // If not found, return error response with 404 status
     
-    $checkSql = "SELECT id FROM comments WHERE id = :id";
+    $checkSql = "SELECT id FROM comments_resource WHERE id = :id";
     $checkStmt = $db->prepare($checkSql);
     $checkStmt->bindValue(':id', $commentId);
     $checkStmt->execute();
@@ -809,12 +799,12 @@ function deleteComment($db, $commentId) {
     // TODO: Prepare DELETE query
     // DELETE FROM comments WHERE id = ?
     
-    $sql = "DELETE FROM comments WHERE id = :id";
+    $sql = "DELETE FROM comments_resource WHERE id = ?";
 
     // TODO: Bind the comment_id parameter
     
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':id', $commentId);
+    $stmt->bindValue(1, $commentId);
 
     // TODO: Execute the query
     
@@ -924,7 +914,7 @@ try {
         // Set HTTP status to 405 (Method Not Allowed)
         // Return JSON error message using sendResponse()
 
-        sendResponse(false, [], "Method Not Allowed", 405);
+        sendResponse(["success" => false, "message" => "Method Not Allowed"], 405);
 
     }
     
@@ -935,7 +925,8 @@ try {
     // Do NOT expose detailed error messages to the client in production
     
     error_log($e->getMessage());
-    sendResponse(false, [], "Database error", 500);
+    sendResponse(["success" => false, "message" => "Database error"], 500);
+
 
 } catch (Exception $e) {
     // TODO: Handle general errors
@@ -943,7 +934,7 @@ try {
     // Return error response with 500 status
 
     error_log($e->getMessage());
-    sendResponse(false, [], "Server error", 500);
+    sendResponse(["success" => false, "message" => "Server error"], 500);
 
 }
 
@@ -1051,7 +1042,7 @@ function validateRequiredFields($data, $requiredFields) {
         'valid' => (count($missing) === 0),
         'missing' => $missing
     ];
-    
+
 }
 
 ?>

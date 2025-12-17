@@ -14,6 +14,7 @@
 // --- Global Data Store ---
 // This will hold the resources loaded from the JSON file.
 let resources = [];
+let editingResourceId = null;
 
 // --- Element Selections ---
 // TODO: Select the resource form ('#resource-form').
@@ -111,66 +112,110 @@ function renderTable() {
  * It should:
  * 1. Prevent the form's default submission.
  * 2. Get the values from the title, description, and link inputs.
- * 3. Create a new resource object with a unique ID (e.g., `id: \`res_${Date.now()}\``).
- * 4. Add this new resource object to the global `resources` array (in-memory only).
+ * 3. IF in edit mode (editingId not null): update the existing resource.
+ * 4. ELSE: Create a new resource object with a unique ID.
  * 5. Call `renderTable()` to refresh the list.
- * 6. Reset the form.
+ * 6. Reset the form and exit edit mode if needed.
  */
 function handleAddResource(event) {
-    // 1. Prevent the form's default submission
-    event.preventDefault();
-    
-    // 2. Get the values from the title, description, and link inputs
-    const titleInput = document.getElementById('resource-title');
-    const descriptionInput = document.getElementById('resource-description');
-    const linkInput = document.getElementById('resource-link');
-    
-    const title = titleInput.value.trim();
-    const description = descriptionInput.value.trim();
-    const link = linkInput.value.trim();
-    
-    // 3. Create a new resource object with a unique ID
+  // 1. Prevent the form's default submission.
+  event.preventDefault();
+
+  // 2. Get the values from the title, description, and link inputs.
+  const title = document.getElementById('resource-title').value.trim();
+  const description = document.getElementById('resource-description').value.trim();
+  const link = document.getElementById('resource-link').value.trim();
+
+  // 3. IF in edit mode: update the existing resource (in-memory only).
+  if (editingId) {
+    resources = resources.map((r) => {
+      if (r.id === editingId) {
+        return { ...r, title, description, link };
+      }
+      return r;
+    });
+
+    // Exit edit mode
+    editingId = null;
+    document.getElementById('add-resource').textContent = "Add Resource";
+    const formTitle = document.getElementById('form-title');
+    if (formTitle) formTitle.textContent = "Add a New Resource";
+  } else {
+    // 4. ELSE: Create a new resource object with a unique ID.
     const newResource = {
-        id: `res_${Date.now()}`, // Unique ID using timestamp
-        title: title,
-        description: description,
-        link: link
+      id: `res_${Date.now()}`,
+      title,
+      description,
+      link
     };
-    
-    // 4. Add this new resource object to the global `resources` array
+
+    // Add it to the global resources array (in-memory only).
     resources.push(newResource);
-    
-    // 5. Call `renderTable()` to refresh the list
-    renderTable();
-    
-    // 6. Reset the form
-    event.target.reset();}
+  }
+
+  // 5. Call `renderTable()` to refresh the list.
+  renderTable();
+
+  // 6. Reset the form.
+  event.target.reset();
+}
+
 
 /**
  * TODO: Implement the handleTableClick function.
  * This is an event listener on the `resourcesTableBody` (for delegation).
  * It should:
- * 1. Check if the clicked element (`event.target`) has the class "delete-btn".
- * 2. If it does, get the `data-id` attribute from the button.
- * 3. Update the global `resources` array by filtering out the resource
- * with the matching ID (in-memory only).
- * 4. Call `renderTable()` to refresh the list.
+ * 1. If clicked is "delete-btn": delete resource then render.
+ * 2. If clicked is "edit-btn": load data into the form + enter edit mode.
  */
 function handleTableClick(event) {
-  // ..    // 1. Check if the clicked element has the class "delete-btn"
-    if (event.target.classList.contains('delete-btn')) {
-        // 2. Get the data-id attribute from the button
-        const resourceId = event.target.getAttribute('data-id');
-        
-        if (confirm('Are you sure you want to delete this resource?')) {
-            // 3. Update the global resources array by filtering out the resource
-            resources = resources.filter(resource => resource.id !== resourceId);
-            
-            // 4. Call renderTable() to refresh the list
-            renderTable();
-        }
+
+  // ---- DELETE ----
+  // 1. Check if the clicked element has the class "delete-btn".
+  if (event.target.classList.contains('delete-btn')) {
+    // 2. Get the `data-id` attribute from the button.
+    const resourceId = event.target.getAttribute('data-id');
+
+    // 3. Filter out the resource with matching ID (in-memory only).
+    resources = resources.filter((r) => r.id !== resourceId);
+
+    // 4. Refresh the table.
+    renderTable();
+
+    // If we were editing the deleted item, exit edit mode
+    if (editingId === resourceId) {
+      editingId = null;
+      document.getElementById('add-resource').textContent = "Add Resource";
+      const formTitle = document.getElementById('form-title');
+      if (formTitle) formTitle.textContent = "Add a New Resource";
+      resourceForm.reset();
     }
+
+    return;
+  }
+
+  // ---- EDIT ----
+  // 1. Check if the clicked element has the class "edit-btn".
+  if (event.target.classList.contains('edit-btn')) {
+    // 2. Get the `data-id` attribute from the button.
+    const resourceId = event.target.getAttribute('data-id');
+
+    // 3. Find the matching resource in the global array.
+    const resource = resources.find((r) => r.id === resourceId);
+    if (!resource) return;
+
+    // 4. Enter edit mode.
+    editingId = resourceId;
+
+    // 5. Fill the form inputs with the resource data.
+    document.getElementById('resource-title').value = resource.title || '';
+    document.getElementById('resource-description').value = resource.description || '';
+    document.getElementById('resource-link').value = resource.link || '';
+
+    // 6. Change the button text to "Update Resource".
+    document.getElementById('add-resource').textContent = "Update Resource";}
 }
+
 
 
 /**
@@ -245,3 +290,4 @@ async function loadAndInitialize() {
 // --- Initial Page Load ---
 // Call the main async function to start the application.
 loadAndInitialize();
+

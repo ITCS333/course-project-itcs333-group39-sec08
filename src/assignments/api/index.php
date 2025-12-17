@@ -66,16 +66,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // DATABASE CONNECTION
 // ============================================================================
 
-// TODO: Include the database connection class
- //include '../../db.php';
- //require 'db.php';
- require __DIR__ . '/../../../db.php';
+try {
+    require_once __DIR__ . '/../../../../includes/db.php';
+    $database = new Database();
+    $db = $database->getConnection();
 
-// TODO: Create database connection
-$db = $pdo;
 
-// TODO: Set PDO to throw exceptions on errors
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection failed']);
+    exit;
+}
 
 
 // ============================================================================
@@ -500,8 +501,9 @@ function getCommentsByAssignment($db, $assignmentId) {
     }
 
     // TODO: Prepare SQL query to select all comments for the assignment
+    // CHANGE TABLE NAME FROM "comments" TO "comments_assignment"
     $sql = "SELECT id, assignment_id, author, text, created_at 
-            FROM comments 
+            FROM comments_assignment 
             WHERE assignment_id = :assignment_id
             ORDER BY created_at DESC";
 
@@ -517,7 +519,6 @@ function getCommentsByAssignment($db, $assignmentId) {
 
     // TODO: Return success response with comments data
     echo json_encode($comments);
-    
 }
 
 
@@ -564,7 +565,8 @@ function createComment($db, $data) {
     }
 
     // TODO: Prepare INSERT query for comment
-    $sql = "INSERT INTO comments (assignment_id, author, text, created_at)
+    // CHANGE TABLE NAME FROM "comments" TO "comments_assignment"
+    $sql = "INSERT INTO comments_assignment (assignment_id, author, text, created_at)
             VALUES (:assignment_id, :author, :text, NOW())";
 
     // TODO: Bind all parameters
@@ -591,7 +593,6 @@ function createComment($db, $data) {
         'author' => $author,
         'text' => $text
     ]);
-    
 }
 
 
@@ -613,7 +614,8 @@ function deleteComment($db, $commentId) {
     }
 
     // TODO: Check if comment exists
-    $checkSql = "SELECT id FROM comments WHERE id = :id";
+    
+    $checkSql = "SELECT id FROM comments_assignment WHERE id = :id";
     $checkStmt = $db->prepare($checkSql);
     $checkStmt->bindValue(':id', $commentId);
     $checkStmt->execute();
@@ -625,7 +627,8 @@ function deleteComment($db, $commentId) {
     }
 
     // TODO: Prepare DELETE query
-    $sql = "DELETE FROM comments WHERE id = :id";
+   
+    $sql = "DELETE FROM comments_assignment WHERE id = :id";
 
     // TODO: Bind the :id parameter
     $stmt = $db->prepare($sql);
@@ -642,7 +645,6 @@ function deleteComment($db, $commentId) {
     }
 
     echo json_encode(['success' => true]);
-    
 }
 
 

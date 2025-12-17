@@ -1,4 +1,3 @@
-
 let currentAssignmentId = null;
 let currentComments = [];
 
@@ -10,38 +9,27 @@ const commentList = document.querySelector("#comment-list");
 const commentForm = document.querySelector("#comment-form");
 const newCommentText = document.querySelector("#new-comment-text");
 
-
-
 /**
- * TODO: Implement the getAssignmentIdFromURL function.
- * It should:
- * 1. Get the query string from `window.location.search`.
- * 2. Use the `URLSearchParams` object to get the value of the 'id' parameter.
- * 3. Return the id.
+ * Get assignment ID from URL
  */
 function getAssignmentIdFromURL() {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  return urlParams.get('id');
+  return urlParams.get("id");
 }
 
 /**
- * TODO: Implement the renderAssignmentDetails function.
- * It takes one assignment object.
- * It should:
- * 1. Set the `textContent` of `assignmentTitle` to the assignment's title.
- * 2. Set the `textContent` of `assignmentDueDate` to "Due: " + assignment's dueDate.
- * 3. Set the `textContent` of `assignmentDescription`.
- * 4. Clear `assignmentFilesList` and then create and append
- * `<li><a href="#">...</a></li>` for each file in the assignment's 'files' array.
+ * Render assignment details
  */
 function renderAssignmentDetails(assignment) {
   assignmentTitle.textContent = assignment.title;
   assignmentDueDate.textContent = "Due: " + assignment.due_date;
   assignmentDescription.textContent = assignment.description;
+
   assignmentFilesList.innerHTML = "";
 
-  assignment.files.forEach((file) => {
+  const files = Array.isArray(assignment.files) ? assignment.files : [];
+  files.forEach((file) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = "#";
@@ -49,13 +37,10 @@ function renderAssignmentDetails(assignment) {
     li.appendChild(a);
     assignmentFilesList.appendChild(li);
   });
-
 }
 
 /**
- * TODO: Implement the createCommentArticle function.
- * It takes one comment object {author, text}.
- * It should return an <article> element matching the structure in `details.html`.
+ * Create comment article
  */
 function createCommentArticle(comment) {
   const article = document.createElement("article");
@@ -70,16 +55,10 @@ function createCommentArticle(comment) {
   article.appendChild(footer);
 
   return article;
-
 }
 
 /**
- * TODO: Implement the renderComments function.
- * It should:
- * 1. Clear the `commentList`.
- * 2. Loop through the global `currentComments` array.
- * 3. For each comment, call `createCommentArticle()`, and
- * append the resulting <article> to `commentList`.
+ * Render comments
  */
 function renderComments() {
   commentList.innerHTML = "";
@@ -90,111 +69,79 @@ function renderComments() {
 }
 
 /**
- * TODO: Implement the handleAddComment function.
- * This is the event handler for the `commentForm` 'submit' event.
- * It should:
- * 1. Prevent the form's default submission.
- * 2. Get the text from `newCommentText.value`.
- * 3. If the text is empty, return.
- * 4. Create a new comment object: { author: 'Student', text: commentText }
- * (For this exercise, 'Student' is a fine hardcoded author).
- * 5. Add the new comment to the global `currentComments` array (in-memory only).
- * 6. Call `renderComments()` to refresh the list.
- * 7. Clear the `newCommentText` textarea.
+ * Add comment (DB)
  */
-function handleAddComment(event) {
+async function handleAddComment(event) {
   event.preventDefault();
+
   const commentText = newCommentText.value.trim();
-  if (commentText === "") {
-    return;
+  if (commentText === "") return;
+
+  try {
+    const response = await fetch("api/index.php?resource=comments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assignment_id: currentAssignmentId,
+        author: "Student",
+        text: commentText,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!result.error) {
+      currentComments.unshift(result);
+      renderComments();
+      newCommentText.value = "";
+    } else {
+      console.error(result.error);
+    }
+  } catch (err) {
+    console.error("Failed to add comment:", err);
   }
-  const newComment = {
-    author: "Student",
-    text: commentText
-  };
-  currentComments.push(newComment);
-  renderComments();
-  newCommentText.value = "";
-
-
 }
 
 /**
- * TODO: Implement an `initializePage` function.
- * This function needs to be 'async'.
- * It should:
- * 1. Get the `currentAssignmentId` by calling `getAssignmentIdFromURL()`.
- * 2. If no ID is found, display an error and stop.
- * 3. `fetch` both 'assignments.json' and 'comments.json' (you can use `Promise.all`).
- * 4. Find the correct assignment from the assignments array using the `currentAssignmentId`.
- * 5. Get the correct comments array from the comments object using the `currentAssignmentId`.
- * Store this in the global `currentComments` variable.
- * 6. If the assignment is found:
- * - Call `renderAssignmentDetails()` with the assignment object.
- * - Call `renderComments()` to show the initial comments.
- * - Add the 'submit' event listener to `commentForm` (calls `handleAddComment`).
- * 7. If the assignment is not found, display an error.
+ * Initialize page
  */
 async function initializePage() {
   currentAssignmentId = getAssignmentIdFromURL();
 
   if (!currentAssignmentId) {
-    console.error("No assignment ID found in URL.");
     assignmentTitle.textContent = "No assignment ID found in URL.";
     return;
   }
 
   try {
-    // Get all assignments from the API (DB instead of assignments.json)
-    const response = await fetch("api/index.php?resource=assignments");
-    const assignments = await response.json();
-
-    // Find the assignment with the matching ID
-    const assignment = assignments.find(
-      (a) => String(a.id) === String(currentAssignmentId)
+    // Fetch assignment
+    const assignmentRes = await fetch(
+      `api/index.php?resource=assignments&id=${currentAssignmentId}`
     );
+    const assignment = await assignmentRes.json();
 
-    if (!assignment) {
-      assignmentTitle.textContent = "Assignment not found.";
+    if (!assignment || assignment.error) {
+      assignmentTitle.textContent = assignment?.error || "Assignment not found.";
       return;
     }
 
-    currentComments = [];
+    // Fetch comments
+    const commentsRes = await fetch(
+      `api/index.php?resource=comments&assignment_id=${currentAssignmentId}`
+    );
 
+    currentComments = commentsRes.ok ? await commentsRes.json() : [];
+
+    // Render
     renderAssignmentDetails(assignment);
     renderComments();
 
     commentForm.addEventListener("submit", handleAddComment);
   } catch (error) {
-    console.error("Error while initializing page:", error);
+    console.error(error);
     assignmentTitle.textContent =
       "Error: could not load assignment from server.";
   }
-
 }
-/*
 
-currentAssignmentId = getAssignmentIdFromURL();
-
-  if (!currentAssignmentId) {
-    console.error("No assignment ID found in URL.");
-    assignmentTitle.textContent = "No assignment ID found in URL.";
-    return;
-  }
-
-  try {
-    const assignment = await apiRequest(`?action=read&id=${currentAssignmentId}`);
-    const comments = await apiRequest(`?action=comments&id=${currentAssignmentId}`);
-
-    currentComments = Array.isArray(comments) ? comments : [];
-
-    renderAssignmentDetails(assignment);
-    renderComments();
-    commentForm.addEventListener("submit", handleAddComment);
-  } catch (error) {
-    console.error("Error while initializing page:", error);
-    assignmentTitle.textContent = "Error: could not load assignment from server.";
-  }
-      */
-
-  document.addEventListener("DOMContentLoaded", initializePage);
+document.addEventListener("DOMContentLoaded", initializePage);

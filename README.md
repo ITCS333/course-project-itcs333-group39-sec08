@@ -7,11 +7,11 @@
 <html>
 <body>
 <ul>
-    <li>Sondos Falah</li>
-    <li>Fatima Ebrahim</li>
-    <li>Raneem Buhamad</li>
-    <li>Zainab Abdulkarim- 202307999</li>
-    <li>Noor Jameel</li>
+    <li>Sondos Ali Falah- 202306636</li>
+    <li>Fatima Ebrahim- 202308524</li>
+    <li>Raneem Sami Buhamad- 202308389</li>
+    <li>Zainab Abdulkarim Hasan- 202307999</li>
+    <li>Noor Jameel Hasan- 202307912</li>
 </ul>
 
 </body>
@@ -31,30 +31,31 @@
     <tr>
         <td>1</td>
         <td>Homepage, Admin Portal & User Management</td>
-        <td>Sondos Falah</td>
+        <td>Sondos Falah - 202306636</td>
     </tr>
     <tr>
         <td>2</td>
         <td>Course Resources</td>
-        <td>Fatima Ebrahim</td>
+        <td>Fatima Ebrahim Sulaiman - 202308524</td>
     </tr>
     <tr>
         <td>3</td>
         <td>Weekly Breakdown</td>
-        <td>Raneem Buhamad</td>
+        <td>Raneem Sami Buhamad - 202308389</td>
     </tr>
     <tr>
         <td>4</td>
         <td>Assignments</td>
-        <td>Zainab Abdulkarim</td>
+        <td>Zainab Abdulkarim Hasan - 202307999</td>
     </tr>
     <tr>
         <td>5</td>
         <td>General Discussion Boards</td>
-        <td>Noor Jameel</td>
+        <td>Noor Jameel Hasan - 202307912</td>
     </tr>
 </table>
 
 </body>
 </html>
 ## A link to your live, hosted application on Replit.
+https://replit.com/@rnymsmy7/ITCS333-1?v=1 

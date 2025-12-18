@@ -1,72 +1,175 @@
-<!--
-  Requirement: Create the Course Homepage
-
-  Instructions:
-  This page will serve as the main entry point to the course website.
-  It should contain a simple navigation menu with links to all the key pages.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add the 'meta' tag for character encoding (UTF-8). -->
-    <meta charset="UTF-8">
-    <!-- TODO: Add the responsive 'viewport' meta tag. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- TODO: Add a title, e.g., "Web Dev Course Homepage". -->
-     <title>Web Dev Course Homepage</title>
-    <!-- TODO: Link to your CSS framework or stylesheet. -->
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Dev Course Homepage</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+<link rel="stylesheet" href="styles.css">
+
+<style>
+body {
+padding: 20px;
+max-width: 1200px;
+margin: 0 auto;
+}
+
+header {
+text-align: center;
+margin-bottom: 40px;
+padding-bottom: 20px;
+border-bottom: 2px solid #eee;
+}
+
+h1 {
+color: #333;
+margin-bottom: 10px;
+}
+
+.description {
+color: #666;
+font-size: 1.1em;
+}
+
+.nav-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 20px;
+margin-bottom: 40px;
+}
+
+.nav-section {
+background: #fff;
+padding: 25px;
+border-radius: 8px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-section h2 {
+font-size: 1.2em;
+color: #333;
+margin-top: 0;
+padding-bottom: 10px;
+border-bottom: 1px solid #eee;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.nav-section h2 i {
+color: #555;
+}
+
+.nav-list {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.nav-list li {
+margin-bottom: 8px;
+}
+
+.nav-list a {
+display: block;
+padding: 12px 15px;
+text-decoration: none;
+color: #333;
+background: #f8f9fa;
+border-radius: 5px;
+border-left: 4px solid #007bff;
+transition: all 0.2s ease;
+}
+
+.nav-list a:hover {
+background: #e9ecef;
+transform: translateX(5px);
+}
+
+.admin-section h2 {
+color: #dc3545;
+}
+
+.admin-section .nav-list a {
+border-left-color: #dc3545;
+}
+
+.student-section h2 {
+color: #28a745;
+}
+
+.student-section .nav-list a {
+border-left-color: #28a745;
+}
+
+.general-section h2 {
+color: #6c757d;
+}
+
+footer {
+text-align: center;
+margin-top: 40px;
+padding-top: 20px;
+color: #666;
+border-top: 1px solid #eee;
+font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+.nav-grid {
+grid-template-columns: 1fr;
+}
+
+.nav-section {
+padding: 20px;
+}
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
 <body>
+<header>
+<h1>Welcome to the Web Development Course</h1>
+<p class="description">This portal gives access to all course resources, weeks, assignments, and discussions.</p>
+</header>
 
-    <!-- TODO: Create a 'header' with a main heading ('h1') like "Welcome to the Web Development Course". -->
-     <header>
-        <h1>Welcome to the Web Development Course</h1>
-        <p>This portal gives access to all course resources, weeks, assignments, and discussions.</p>
-    </header>
-    <!-- TODO: Create the 'main' content area. -->
-     <main>
-        <!-- TODO: Create a 'nav' element to hold the site navigation. -->
-         <nav>
-            <!-- TODO: Add a sub-heading ('h2') "Site Navigation". -->
-             <h2>Site Navigation</h2>
-            <!-- TODO: Create an unordered list ('ul') to hold the links. -->
-             <ul>
-                <!-- Section: General -->
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Login page.
-                     - Text: "Login" -->
-                    <li><a href="src/auth/login.html">Login</a></li>
-                <!-- Section: Admin Pages -->
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Portal.
-                     - Text: "Admin Portal (Manage Students)" -->
-                    <li><a href="src/admin/manage_users.html">Admin Portal (Manage Students)</a></li>
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Resources page.
-                     - Text: "Admin: Manage Resources" -->
-                    <li><a href="src/resources/admin.html">Admin: Manage Resources</a></li>
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Weekly Breakdown page.
-                     - Text: "Admin: Manage Weekly Breakdown" -->
-                    <li><a href="src/weekly/admin.html">Admin: Manage Weekly Breakdown</a></li>        
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Assignments page.
-                     - Text: "Admin: Manage Assignments" -->
-                     <li><a href="src/assignments/admin.html">Admin: Manage Assignments</a></li>
-                <!-- Section: Student Pages -->
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Student Resources page.
-                     - Text: "View Course Resources" -->
-                    <li><a href="src/resources/list.html">View Course Resources</a></li>
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Student Weekly Breakdown page.
-                     - Text: "View Weekly Breakdown" -->
-                    <li><a href="src/weekly/list.html">View Weekly Breakdown</a></li>
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Student Assignments page.
-                     - Text: "View Assignments" -->
-                    <li><a href="src/assignments/list.html">View Assignments</a></li>
-                <!-- TODO: Add a list item ('li') with a link ('a') to the Discussion Board.
-                     - Text: "General Discussion Board" -->
-                    <li><a href="src/discussion/board.html">General Discussion Board</a></li>
-            <!-- End of the unordered list. -->
-             </ul>
-        <!-- End of the 'nav' element. -->
-         </nav>
-    <!-- End of 'main'. -->
-     </main>
+<main>
+<div class="nav-grid">
+<!-- General Section -->
+<div class="nav-section general-section">
+<h2><i class="fas fa-sign-in-alt"></i> General</h2>
+<ul class="nav-list">
+<li><a href="src/auth/login.html">Login</a></li>
+</ul>
+</div>
+
+<!-- Admin Section -->
+<div class="nav-section admin-section">
+<h2><i class="fas fa-user-shield"></i> Admin Pages</h2>
+<ul class="nav-list">
+<li><a href="src/admin/manage_users.html">Admin Portal (Manage Students)</a></li>
+<li><a href="src/resources/admin.html">Admin: Manage Resources</a></li>
+<li><a href="src/weekly/admin.html">Admin: Manage Weekly Breakdown</a></li>
+<li><a href="src/assignments/admin.html">Admin: Manage Assignments</a></li>
+</ul>
+</div>
+
+<!-- Student Section -->
+<div class="nav-section student-section">
+<h2><i class="fas fa-user-graduate"></i> Student Pages</h2>
+<ul class="nav-list">
+<li><a href="src/resources/list.html">View Course Resources</a></li>
+<li><a href="src/weekly/list.html">View Weekly Breakdown</a></li>
+<li><a href="src/assignments/list.html">View Assignments</a></li>
+<li><a href="src/discussion/board.html">General Discussion Board</a></li>
+</ul>
+</div>
+</div>
+</main>
+
+<footer>
+<p>© 2023 Web Development Course. All rights reserved.</p>
+</footer>
 </body>
 </html>

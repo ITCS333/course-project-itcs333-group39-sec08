@@ -1,87 +1,410 @@
-
-
-   .assignment-page {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 20px;
-    font-family: Arial, sans-serif;
+/* ========== admin.html & list.html unified ========== */
+:root {
+    --primary: #0066cc;
+    --primary-600: #0055aa;
+    --muted: #6c757d;
+    --surface: #ffffff;
+    --border: #e9ecef;
+}
+body {
+    padding: 1.5rem;
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8fafc;
     line-height: 1.5;
+    color: #000000;
+    font-size: 0.95rem;
 }
-
-.assignment-page h1 {
-    font-size: 26px;
-    margin-bottom: 20px;
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: var(--surface, #fff);
+    border-radius: 14px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(3, 38, 76, 0.05);
 }
-
-.assignment-page h2 {
-    font-size: 20px;
-    margin-bottom: 10px;
+header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
 }
-
-
-.assignment-form-section fieldset {
-    border: 1px solid #ccc;
-    padding: 15px;
-    border-radius: 6px;
+header h1 {
+    color: #000000;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    padding: 0.5rem 0;
 }
-
-.assignment-form-section label {
-    display: block;
-    font-size: 14px;
-    margin-top: 12px;
+section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
 }
-
-.assignment-form-section input,
-.assignment-form-section textarea {
-    width: 100%;
-    padding: 8px;
-    margin-top: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+section h2 {
+    color: var(--primary, #0066cc);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid rgba(36, 43, 49, 0.12);
 }
-
-
-.assignment-btn {
-    margin-top: 15px;
-    padding: 8px 14px;
-    border: none;
-    border-radius: 4px;
-    background-color: #ddd;  
-    cursor: pointer;
-}
-
-.assignment-btn:hover {
-    background-color: #ccc;
-}
-
-
-#assignments-table {
+table {
+    margin-top: 1rem;
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    font-size: 0.94rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 2px solid #000000;
 }
-
-#assignments-table th,
-#assignments-table td {
-    border: 1px solid #ccc;
-    padding: 10px;
+table th {
+    background-color: rgba(149, 152, 156, 0.06);
+    color: var(--primary, #0066cc);
+    font-weight: 600;
+    padding: 1rem;
     text-align: left;
+    border-bottom: 2px solid rgba(0, 102, 204, 0.08);
 }
-
-#assignments-table th {
-    background-color: #f0f0f0;
-    font-weight: bold;
+table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
 }
-
-.edit-assignment, .delete-assignment {
-    padding: 6px 10px;
+table tbody tr:hover {
+    background-color: #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+table tbody tr:nth-child(even):hover {
+    background-color: #f1f5f9;
+}
+.button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    align-items: center;
+}
+button {
+    padding: 0.5rem 0.95rem;
+    font-size: 0.92rem;
+    border-radius: 10px;
     border: none;
-    border-radius: 4px;
-    background-color: #ddd; 
+    background-color: var(--primary, #0066cc);
+    color: white;
+    font-weight: 600;
     cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    box-shadow: 0 6px 18px rgba(3, 38, 76, 0.06);
+}
+button:hover {
+    background-color: var(--primary-600, #0055aa);
+    box-shadow: 0 10px 24px rgba(3, 38, 76, 0.08);
+    transform: translateY(-2px);
+}
+button:active {
+    transform: translateY(0);
+}
+.button-group .edit,
+.edit-assignment {
+    background-color: var(--primary, #0066cc);
+    color: white;
+    border: none;
+    padding: 0.45rem 0.9rem;
+    line-height: 1;
+}
+.button-group .delete,
+.delete-assignment {
+    background-color: var(--muted, #6c757d);
+    color: white;
+    border: none;
+    padding: 0.45rem 0.9rem;
+}
+.button-group .delete:hover,
+.delete-assignment:hover {
+    background-color: #5a6268;
+    color: white;
+}
+.button-group button,
+#add-assignment,
+#add-week {
+    min-width: 84px;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+}
+.button-group button,
+#add-assignment,
+#add-week {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+}
+#add-assignment,
+#add-week {
+    margin-top: 1.5rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    background-color: var(--primary, #0066cc);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+    display: block;
+    width: auto;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 8px 20px rgba(3, 38, 76, 0.06);
+    line-height: 1;
+}
+#add-assignment:hover,
+#add-week:hover {
+    background-color: var(--primary-600, #0055aa);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(3, 38, 76, 0.08);
+}
+form label {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #2d3748;
+}
+form input,
+form textarea {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 100%;
+    transition: border-color 0.2s ease;
+}
+form input:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--accent, #0066cc);
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+}
+#form-section {
+    border: 1px solid var(--border, #e9ecef);
+    border-radius: 12px;
+    padding: 1.5rem;
+    background-color: var(--surface, #fff);
+    margin: 0 auto 2rem auto;
+    box-shadow: 0 8px 24px rgba(3, 38, 76, 0.03);
+    max-width: 100%;
+}
+#form-section fieldset {
+    border: 1px solid #f1f3f5;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background: white;
+    margin: 0;
+}
+#form-section legend {
+    font-weight: 600;
+    color: #495057;
+    padding: 0 1rem;
+    font-size: 1.1rem;
+}
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    section {
+        padding: 1rem;
+    }
+    table {
+        font-size: 0.85rem;
+    }
+    .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .button-group button {
+        width: 100%;
+        min-width: auto;
+    }
+    header h1 {
+        font-size: 1.5rem;
+    }
+    section h2 {
+        font-size: 1.25rem;
+    }
 }
 
-.edit-assignment:hover,
- .delete-assignment:hover {  
-    background-color: #ccc;
+/* ========== details.html ========== */
+h1 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    text-align: center;
+    color: #000000;
+    font-weight: 700;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+h2 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    color: #1a365d;
+    font-weight: 600;
+}
+article {
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    font-size: 0.95rem;
+    transition: box-shadow 0.2s ease;
+}
+article:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+#discussion-form article {
+    margin-bottom: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: box-shadow 0.2s ease;
+}
+#discussion-form article:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+#discussion-form article p {
+    margin-bottom: 1rem;
+    color: #333;
+    font-style: normal;
+}
+#discussion-form article footer {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #2563eb;
+    font-style: normal;
+    font-weight: 600;
+    border-top: 1px solid #e9ecef;
+    padding-top: 0.75rem;
+}
+form {
+    margin-top: 2rem;
+}
+form fieldset {
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+form legend {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a365d;
+    padding: 0 0.5rem;
+}
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+textarea {
+    border-radius: 8px;
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    font-family: inherit;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+input {
+    border-radius: 8px;
+    font-size: 0.95rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #ced4da;
+}
+input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+button[type="submit"] {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    display: inline-block;
+    width: auto;
+    margin-top: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+button[type="submit"]:hover {
+    background-color: #1d4ed8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+button[type="submit"]:active {
+    transform: translateY(0);
+}
+ul {
+    margin-left: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+ul li {
+    margin-bottom: 0.5rem;
+}
+ul a {
+    color: #2563eb;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+ul a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+@media (max-width: 768px) {
+    body {
+        padding: 0.5rem;
+    }
+    .container {
+        padding: 1rem;
+    }
+    section {
+        padding: 1rem;
+    }
+    h1 {
+        font-size: 1.5rem;
+    }
 }

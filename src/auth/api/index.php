@@ -1,158 +1,118 @@
 <?php
-/**
- * Authentication Handler for Student/Admin Login
- */
-
-// --- Session Management ---
 session_start();
 
-// --- Set Response Headers ---
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// --- Handle Preflight Requests ---
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// --- Check Request Method ---
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Only POST requests are allowed']);
     exit;
 }
 
-// --- Get POST Data ---
-$rawData = file_get_contents("php://input");
-$data = json_decode($rawData, true);
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
-// Fallback to form data if JSON parsing fails
 if (!$data) {
     $data = $_POST;
 }
 
-// Check if data was received
-if (!$data) {
-    echo json_encode(['success' => false, 'message' => 'No data received']);
-    exit;
-}
-
-// Check required fields
 if (!isset($data['email']) || !isset($data['password'])) {
     echo json_encode(['success' => false, 'message' => 'Email and password required']);
     exit;
 }
 
-// Get and validate email
-$email = filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL);
+$email = trim($data['email']);
 $password = $data['password'];
 
+// Debug logging
+error_log("Login attempt - Email: " . $email . ", Password length: " . strlen($password));
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    error_log("Invalid email format: " . $email);
     echo json_encode(['success' => false, 'message' => 'Invalid email format']);
     exit;
 }
 
-if (strlen($password) < 8) {
-    echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters']);
+$dbPath = __DIR__ . '/../../../../includes/db.php';
+if (!file_exists($dbPath)) {
+    echo json_encode(['success' => false, 'message' => 'Database configuration not found']);
     exit;
 }
 
-// --- Database Connection ---
+require_once $dbPath;
+
 try {
-    // Include database connection
-    require_once __DIR__ . '/../../../includes/db.php';
-    
-    // Create database connection
     $database = new Database();
     $pdo = $database->getConnection();
-    
-    // --- Check if user exists in students table ---
-    $sql = "SELECT id, student_id, name, email, password FROM students WHERE email = :email";
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $e->getMessage()]);
+    exit;
+}
+
+try {
+    $sql = "SELECT id, name, email, password, is_admin FROM users WHERE email = :email LIMIT 1";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':email' => $email]);
-    $user = $stmt->fetch();
-    
-    // --- Verify password ---
-    if ($user && password_verify($password, $user['password'])) {
-        // --- Store user data in session ---
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['student_id'] = $user['student_id'];
-        $_SESSION['user_name'] = $user['name'];
-        $_SESSION['user_email'] = $user['email'];
-        $_SESSION['logged_in'] = true;
-        $_SESSION['user_type'] = 'student'; // Or 'admin' for admin users
-        
-        // Determine redirect URL based on user role
-        $redirectUrl = '/student-dashboard.php';
-        
-        // Check if it's an admin (you might have an admin table or flag)
-        // For now, let's assume admin has a specific email pattern
-        if (strpos($email, 'admin') !== false || $email === 'admin@example.com') {
-            $_SESSION['user_type'] = 'admin';
-            $redirectUrl = '/admin.html';
-        }
-        
-        // Success response
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) {
+        error_log("User not found: " . $email);
         echo json_encode([
-            'success' => true,
-            'message' => 'Login successful',
-            'user' => [
-                'id' => $user['id'],
-                'student_id' => $user['student_id'],
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'type' => $_SESSION['user_type']
-            ],
-            'redirect' => $redirectUrl
+            'success' => false,
+            'message' => 'Invalid email or password'
         ]);
         exit;
-    } else {
-        // Check admin table if not found in students
-        // You might have a separate admin table
-        $adminSql = "SELECT id, username, email, password FROM admins WHERE email = :email";
-        $adminStmt = $pdo->prepare($adminSql);
-        $adminStmt->execute([':email' => $email]);
-        $admin = $adminStmt->fetch();
-        
-        if ($admin && password_verify($password, $admin['password'])) {
-            // Admin login
-            $_SESSION['user_id'] = $admin['id'];
-            $_SESSION['user_name'] = $admin['username'];
-            $_SESSION['user_email'] = $admin['email'];
-            $_SESSION['logged_in'] = true;
-            $_SESSION['user_type'] = 'admin';
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Admin login successful',
-                'user' => [
-                    'id' => $admin['id'],
-                    'name' => $admin['username'],
-                    'email' => $admin['email'],
-                    'type' => 'admin'
-                ],
-                'redirect' => '/admin.html'
-            ]);
-            exit;
-        } else {
-            // Invalid credentials
-            echo json_encode([
-                'success' => false,
-                'message' => 'Invalid email or password'
-            ]);
-            exit;
-        }
     }
-    
+
+    error_log("User found: " . $email . ", Checking password...");
+    $passVerify = password_verify($password, $user['password']);
+    error_log("Password verify result: " . ($passVerify ? 'TRUE' : 'FALSE'));
+
+    if (!$passVerify) {
+        error_log("Password mismatch for user: " . $email);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid email or password'
+        ]);
+        exit;
+    }
+
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['logged_in'] = true;
+    $_SESSION['user_email'] = $user['email'];
+
+    if ($user['is_admin'] == 1) {
+        $_SESSION['role'] = 'admin';
+        $_SESSION['user_type'] = 'admin';
+        $_SESSION['user_name'] = $user['name'];
+        $redirectUrl = '../admin/manage_users.html';
+    } else {
+        $_SESSION['role'] = 'student';
+        $_SESSION['user_type'] = 'student';
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['student_id'] = $user['id'];
+        $redirectUrl = '../../index.html';
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Login successful',
+        'redirect' => $redirectUrl
+    ]);
+    exit;
+
 } catch (Exception $e) {
-    // Handle database errors
-    error_log("Authentication error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Authentication error occurred'
+        'message' => 'Server error occurred'
     ]);
     exit;
 }

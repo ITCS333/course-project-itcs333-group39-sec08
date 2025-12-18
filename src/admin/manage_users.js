@@ -144,6 +144,16 @@ function createStudentRow(student) {
     deleteButton.textContent = 'Delete';
     deleteButton.className = 'delete-btn btn btn-sm btn-danger';
     deleteButton.setAttribute('data-id', student.student_id || student.id);
+    deleteButton.addEventListener('click', async () => {
+        if (confirm(`Are you sure you want to delete ${student.name}?`)) {
+            try {
+                await deleteStudent(student.student_id || student.id);
+                alert(`${student.name} has been deleted.`);
+            } catch (error) {
+                alert('Failed to delete student: ' + error.message);
+            }
+        }
+    });
     actionsCell.appendChild(deleteButton);
 
     row.appendChild(actionsCell);
@@ -249,50 +259,6 @@ async function handleAddStudent(event) {
     }
 }
 
-async function handleTableClick(event) {
-    const target = event.target;
-
-    if (target.classList.contains('delete-btn')) {
-        const studentId = target.getAttribute('data-id');
-        const student = students.find(s => (s.student_id === studentId) || (s.id == studentId));
-
-        if (student && confirm(`Are you sure you want to delete ${student.name}?`)) {
-            try {
-                await deleteStudent(studentId);
-                alert(`${student.name} has been deleted.`);
-            } catch (error) {
-                alert('Failed to delete student: ' + error.message);
-            }
-        }
-    }
-
-    if (target.classList.contains('edit-btn')) {
-        const studentId = target.getAttribute('data-id');
-        const student = students.find(s => (s.student_id === studentId) || (s.id == studentId));
-
-        if (student) {
-            document.getElementById('student-name').value = student.name;
-            document.getElementById('student-id').value = student.student_id || student.id;
-            document.getElementById('student-email').value = student.email;
-            document.getElementById('default-password').value = '';
-
-            document.getElementById('student-id').setAttribute('disabled', 'disabled');
-
-            const details = document.querySelector('details');
-            if (details) {
-                details.setAttribute('open', 'open');
-            }
-
-            const addBtn = document.getElementById('add');
-            addBtn.textContent = 'Update';
-            addBtn.classList.remove('btn-success');
-            addBtn.classList.add('btn-primary');
-            addBtn.dataset.editing = 'true';
-            addBtn.dataset.editId = student.student_id || student.id;
-        }
-    }
-}
-
 function handleSearch(event) {
     const searchTerm = searchInput.value.toLowerCase().trim();
 
@@ -366,9 +332,12 @@ function handleSort(event) {
     renderTable(students);
 }
 
-function initializeApp() {
-    loadStudents();
-
+// TASK1508: Create the loadStudentsAndInitialize function
+async function loadStudentsAndInitialize() {
+    // Load students data
+    await loadStudents();
+    
+    // Initialize event listeners
     if (changePasswordForm) {
         changePasswordForm.addEventListener('submit', handleChangePassword);
     }
@@ -438,10 +407,6 @@ function initializeApp() {
         });
     }
 
-    if (studentTableBody) {
-        studentTableBody.addEventListener('click', handleTableClick);
-    }
-
     if (searchInput) {
         searchInput.addEventListener('input', handleSearch);
     }
@@ -474,4 +439,7 @@ function initializeApp() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initializeApp);
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    loadStudentsAndInitialize();
+});

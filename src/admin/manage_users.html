@@ -1,123 +1,125 @@
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Admin Portal - Student Management</title>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-            <link rel="stylesheet" href="styles.css">
-            <script>
-                // Check authentication before page loads
-                (function() {
-                    fetch('/src/admin/api/', {
-                        method: 'GET',
-                        credentials: 'same-origin'
-                    }).then(response => {
-                        if (response.status === 401) {
-                            window.location.href = '/src/auth/login.html';
-                        }
-                    }).catch(() => {
-                        window.location.href = '/src/auth/login.html';
-                    });
-                })();
-            </script>
-            <script defer src="manage_users.js"></script>
-        </head>
-        <body>
-            <div id="app-container">
-                <!-- Navigation Header -->
-                <nav>
-                    <ul>
-                        <li><strong>Admin Portal</strong></li>
-                    </ul>
-                    <ul>
-                        <li><span id="admin-name">Admin</span></li>
-                        <li><button id="logout-btn" class="outline">Logout</button></li>
-                    </ul>
-                </nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Student Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Check authentication before page loads
+        (function() {
+            fetch('/src/admin/api/', {
+                method: 'GET',
+                credentials: 'same-origin'
+            }).then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/src/auth/login.html';
+                }
+            }).catch(() => {
+                window.location.href = '/src/auth/login.html';
+            });
+        })();
+    </script>
+    <script defer src="manage_users.js"></script>
+</head>
+<body>
+    <div id="app-container">
+        <!-- TASK1404: Header Structure -->
+        <header>
+            <nav>
+                <ul>
+                    <li><strong>Admin Portal</strong></li>
+                </ul>
+                <ul>
+                    <li><span id="admin-name">Admin</span></li>
+                    <li><button id="logout-btn" class="outline">Logout</button></li>
+                </ul>
+            </nav>
+        </header>
 
-                <main class="container">
-                    <!-- Password Change Section -->
-                    <section>
-                        <article>
-                            <h2>Change Password</h2>
-                            <form id="password-form">
-                                <fieldset>
-                                    <label for="current-password">
-                                        Current Password
-                                        <input id="current-password" name="current-password" type="password" required>
-                                    </label>
-                                    <label for="new-password">
-                                        New Password
-                                        <input id="new-password" name="new-password" type="password" required minlength="8">
-                                    </label>
-                                    <label for="confirm-password">
-                                        Confirm Password
-                                        <input id="confirm-password" name="confirm-password" type="password" required minlength="8">
-                                    </label>
-                                    <button type="submit">Update Password</button>
-                                </fieldset>
-                            </form>
-                        </article>
-                    </section>
+        <main class="container">
+            <!-- Password Change Section -->
+            <section>
+                <article>
+                    <h2>Change Password</h2>
+                    <form id="password-form">
+                        <fieldset>
+                            <label for="current-password">
+                                Current Password
+                                <input id="current-password" name="current-password" type="password" required>
+                            </label>
+                            <label for="new-password">
+                                New Password
+                                <input id="new-password" name="new-password" type="password" required minlength="8">
+                            </label>
+                            <label for="confirm-password">
+                                Confirm Password
+                                <input id="confirm-password" name="confirm-password" type="password" required minlength="8">
+                            </label>
+                            <button type="submit">Update Password</button>
+                        </fieldset>
+                    </form>
+                </article>
+            </section>
 
-                    <!-- Add Student Section -->
-                    <section>
-                        <article>
-                            <details>
-                                <summary><strong>Add New Student</strong></summary>
-                                <form id="add-student-form">
-                                    <fieldset>
-                                        <label for="student-name">
-                                            Student Name
-                                            <input id="student-name" name="student-name" type="text" required>
-                                        </label>
-                                        <label for="student-id">
-                                            Student ID
-                                            <input id="student-id" name="student-id" type="text" required>
-                                        </label>
-                                        <label for="student-email">
-                                            Email
-                                            <input id="student-email" name="student-email" type="email" required>
-                                        </label>
-                                        <label for="default-password">
-                                            Password (leave empty to keep current)
-                                            <input id="default-password" name="default-password" type="text" placeholder="Optional - leave empty to keep current password" required>
-                                        </label>
-                                        <button id="add" type="submit" class="btn-success">Add Student</button>
-                                    </fieldset>
-                                </form>
-                            </details>
-                        </article>
-                    </section>
+            <!-- Add Student Section -->
+            <section>
+                <article>
+                    <details>
+                        <summary><strong>Add New Student</strong></summary>
+                        <form id="add-student-form">
+                            <fieldset>
+                                <label for="student-name">
+                                    Student Name
+                                    <input id="student-name" name="student-name" type="text" required>
+                                </label>
+                                <label for="student-id">
+                                    Student ID
+                                    <input id="student-id" name="student-id" type="text" required>
+                                </label>
+                                <label for="student-email">
+                                    Email
+                                    <input id="student-email" name="student-email" type="email" required>
+                                </label>
+                                <label for="default-password">
+                                    Password (leave empty to keep current)
+                                    <input id="default-password" name="default-password" type="text" placeholder="Optional - leave empty to keep current password" required>
+                                </label>
+                                <button id="add" type="submit" class="btn-success">Add Student</button>
+                            </fieldset>
+                        </form>
+                    </details>
+                </article>
+            </section>
 
-                    <!-- Search Bar -->
-                    <section>
-                        <input id="search-input" type="text" placeholder="Search students by name, ID, or email...">
-                    </section>
+            <!-- Search Bar -->
+            <section>
+                <input id="search-input" type="text" placeholder="Search students by name, ID, or email...">
+            </section>
 
-                    <!-- Students Table -->
-                    <section>
-                        <article>
-                            <h2>Student Management</h2>
-                            <table id="student-table">
-                                <thead>
-                                    <tr>
-                                        <th data-sort="name">Name ↕</th>
-                                        <th data-sort="id">Student ID ↕</th>
-                                        <th data-sort="email">Email ↕</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="4" style="text-align: center; color: #999;">Loading students...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </article>
-                    </section>
-                </main>
-            </div>
-        </body>
-        </html>
+            <!-- Students Table -->
+            <section>
+                <article>
+                    <h2>Student Management</h2>
+                    <table id="student-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="name">Name ↕</th>
+                                <th data-sort="id">Student ID ↕</th>
+                                <th data-sort="email">Email ↕</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #999;">Loading students...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

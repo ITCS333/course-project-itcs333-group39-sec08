@@ -22,6 +22,12 @@ function isValidEmail(email) {
   return emailPattern.test(email);
 }
 
+// TASK1203: Add the isValidPassword function
+function isValidPassword(password) {
+  // Check if password is at least 8 characters long
+  return password.length >= 8;
+}
+
 function handleLogin(event) {
   event.preventDefault();
 
@@ -38,8 +44,15 @@ function handleLogin(event) {
     return;
   }
 
+  // TASK1203: Use the isValidPassword function
+  if (!isValidPassword(password)) {
+    displayMessage("Password must be at least 8 characters long.", "error");
+    return;
+  }
+
   displayMessage("Logging in...", "success");
 
+  // TASK1204: The fetch call should be here
   fetch(LOGIN_API_URL, {
     method: "POST",
     headers: { 

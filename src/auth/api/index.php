@@ -109,7 +109,7 @@ try {
     ]);
     exit;
 
-} catch (Exception $e) {
+} catch (PDOException $e) {  // Changed from Exception to PDOException
     echo json_encode([
         'success' => false,
         'message' => 'Server error occurred'
